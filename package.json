@@ -42,7 +42,6 @@
 		"eslint": "eslint . --max-warnings 0 --cache",
 		"eslint:fix": "eslint . --fix --max-warnings 0 --cache",
 		"fix": "pnpm run bcheck:fix && pnpm run oxlint:fix && pnpm run eslint:fix",
-		"generate": "pnpm run dev generate",
 		"oxlint": "oxlint . --max-warnings 0",
 		"oxlint:fix": "oxlint . --fix --max-warnings 0",
 		"prepublishOnly": "pnpm build",
@@ -52,7 +51,7 @@
 		"test:coverage": "vitest run --coverage --silent",
 		"test:watch": "vitest --silent",
 		"typecheck": "tsgo --noEmit",
-		"prepare": "simple-git-hooks && pnpm generate"
+		"prepare": "simple-git-hooks"
 	},
 	"simple-git-hooks": {
 		"pre-commit": "pnpm exec lint-staged"
