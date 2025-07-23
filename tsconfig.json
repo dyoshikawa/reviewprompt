@@ -7,10 +7,12 @@
     "declarationMap": true,
     "sourceMap": true,
     "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true
+    "exactOptionalPropertyTypes": true,
+    "jsx": "react-jsx"
   },
   "include": [
     "**/*.ts",
+    "**/*.tsx"
   ],
   "exclude": [
     "node_modules",

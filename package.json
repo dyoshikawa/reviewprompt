@@ -58,12 +58,18 @@
 		"pre-commit": "pnpm exec lint-staged"
 	},
 	"dependencies": {
+		"@octokit/rest": "22.0.0",
+		"@types/react": "19.1.8",
 		"chokidar": "4.0.3",
+		"clipboardy": "4.0.0",
 		"commander": "14.0.0",
 		"gray-matter": "4.0.3",
+		"ink": "6.0.1",
+		"ink-select-input": "6.2.0",
 		"js-yaml": "4.1.0",
 		"marked": "15.0.12",
 		"micromatch": "4.0.8",
+		"react": "19.1.0",
 		"zod": "4.0.5"
 	},
 	"devDependencies": {
