@@ -213,3 +213,7 @@ test-*
 
 **/.aiignore
 **/.kiro/steering/
+
+**/.augmentignore
+**/.augment/rules/
+**/.augment-guidelines
