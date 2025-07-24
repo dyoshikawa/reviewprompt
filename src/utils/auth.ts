@@ -1,3 +1,4 @@
+// Forked from https://github.com/yoshiko-pg/difit/blob/main/src/cli/utils.ts
 import { execSync } from "node:child_process";
 
 export function getGitHubToken(): string | undefined {
