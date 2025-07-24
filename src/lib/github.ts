@@ -1,9 +1,11 @@
+import { graphql } from "@octokit/graphql";
 import { Octokit } from "@octokit/rest";
 import { createAuthErrorMessage, getGithubToken } from "../utils/auth.js";
 import type { PRComment, PRInfo } from "./types.js";
 
 export class GitHubClient {
   private octokit: Octokit;
+  private graphqlWithAuth: typeof graphql;
 
   constructor(token?: string) {
     const authToken = token || getGithubToken();
@@ -15,6 +17,12 @@ export class GitHubClient {
 
     this.octokit = new Octokit({
       auth: authToken,
+    });
+
+    this.graphqlWithAuth = graphql.defaults({
+      headers: {
+        authorization: `token ${authToken}`,
+      },
     });
   }
 
@@ -69,19 +77,28 @@ export class GitHubClient {
 
   public async resolveComment(prInfo: PRInfo, commentId: number): Promise<void> {
     try {
-      // First get the current comment to preserve its content
+      // First, get the pull request review comment to find the thread ID
       const { data: comment } = await this.octokit.rest.pulls.getReviewComment({
         owner: prInfo.owner,
         repo: prInfo.repo,
         comment_id: commentId,
       });
 
-      // Keep the original content exactly as is
-      await this.octokit.rest.pulls.updateReviewComment({
-        owner: prInfo.owner,
-        repo: prInfo.repo,
-        comment_id: commentId,
-        body: comment.body,
+      // Use GraphQL to resolve the review thread
+      const mutation = `
+        mutation($threadId: ID!) {
+          resolveReviewThread(input: {threadId: $threadId}) {
+            thread {
+              id
+              isResolved
+            }
+          }
+        }
+      `;
+
+      // The thread ID is the node_id of the comment
+      await this.graphqlWithAuth(mutation, {
+        threadId: comment.node_id,
       });
     } catch (error) {
       if (error instanceof Error) {

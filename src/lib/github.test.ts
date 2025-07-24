@@ -7,6 +7,7 @@ const mockListReviewComments = vi.fn();
 const mockGetReviewComment = vi.fn();
 const mockUpdateReviewComment = vi.fn();
 const mockDeleteReviewComment = vi.fn();
+const mockGraphql = vi.fn();
 
 // Mock Octokit with proper implementation
 vi.mock("@octokit/rest", () => ({
@@ -21,6 +22,13 @@ vi.mock("@octokit/rest", () => ({
     },
     auth: config?.auth,
   })),
+}));
+
+// Mock GraphQL
+vi.mock("@octokit/graphql", () => ({
+  graphql: {
+    defaults: vi.fn().mockReturnValue(mockGraphql),
+  },
 }));
 
 // Mock the auth utilities
@@ -240,11 +248,17 @@ describe("GitHubClient", () => {
 
   describe("resolveComment", () => {
     it("should resolve comment successfully", async () => {
-      const originalBody = "This is the original comment [ai]";
       mockGetReviewComment.mockResolvedValueOnce({
-        data: { body: originalBody },
+        data: { node_id: "MDEyOklzc3VlQ29tbWVudDEyMzQ1Njc=" },
       });
-      mockUpdateReviewComment.mockResolvedValueOnce({});
+      mockGraphql.mockResolvedValueOnce({
+        resolveReviewThread: {
+          thread: {
+            id: "MDEyOklzc3VlQ29tbWVudDEyMzQ1Njc=",
+            isResolved: true,
+          },
+        },
+      });
 
       const prInfo = { owner: "test", repo: "repo", pullNumber: 1 };
       await client.resolveComment(prInfo, 123);
@@ -255,20 +269,20 @@ describe("GitHubClient", () => {
         comment_id: 123,
       });
 
-      expect(mockUpdateReviewComment).toHaveBeenCalledWith({
-        owner: "test",
-        repo: "repo",
-        comment_id: 123,
-        body: originalBody,
-      });
+      expect(mockGraphql).toHaveBeenCalledWith(
+        expect.stringContaining("resolveReviewThread"),
+        {
+          threadId: "MDEyOklzc3VlQ29tbWVudDEyMzQ1Njc=",
+        },
+      );
     });
 
     it("should throw error with Error instance", async () => {
       const mockError = new Error("Not found");
       mockGetReviewComment.mockResolvedValueOnce({
-        data: { body: "Original comment" },
+        data: { node_id: "MDEyOklzc3VlQ29tbWVudDEyMzQ1Njc=" },
       });
-      mockUpdateReviewComment.mockRejectedValueOnce(mockError);
+      mockGraphql.mockRejectedValueOnce(mockError);
 
       const prInfo = { owner: "test", repo: "repo", pullNumber: 1 };
 
@@ -278,7 +292,10 @@ describe("GitHubClient", () => {
     });
 
     it("should throw generic error with non-Error instance", async () => {
-      mockUpdateReviewComment.mockRejectedValueOnce("String error");
+      mockGetReviewComment.mockResolvedValueOnce({
+        data: { node_id: "MDEyOklzc3VlQ29tbWVudDEyMzQ1Njc=" },
+      });
+      mockGraphql.mockRejectedValueOnce("String error");
 
       const prInfo = { owner: "test", repo: "repo", pullNumber: 1 };
 
