@@ -159,6 +159,7 @@
         "XVCJ",
         "testuser",
         "testowner",
-        "testrepo"
+        "testrepo",
+        "tlsv"
     ]
 }
