@@ -69,7 +69,10 @@ function formatCommentLabel(comment: FilteredComment, isSelected: boolean): stri
   const prefix = isSelected ? "☑️ " : "☐ ";
   const path = comment.path ? `${comment.path}` : "General";
   const line = comment.line || comment.startLine ? `:L${comment.line || comment.startLine}` : "";
-  const preview = comment.body.replace(/@ai/g, "").trim().substring(0, 50);
+  const preview = comment.body
+    .replace(/\[ai\]/g, "")
+    .trim()
+    .substring(0, 50);
   const truncated = preview.length === 50 ? "..." : "";
 
   return `${prefix}${path}${line} - ${preview}${truncated}`;
