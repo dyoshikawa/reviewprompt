@@ -1,13 +1,7 @@
-import { Box, render, Text } from "ink";
-import MultiSelect from "ink-multi-select";
-import React from "react";
+import { Box, render, Text, useInput } from "ink";
+import SelectInput from "ink-select-input";
+import React, { useState } from "react";
 import type { FilteredComment } from "../lib/types.js";
-
-// Type assertion for ink-multi-select compatibility
-const MultiSelectComponent = MultiSelect as unknown as React.ComponentType<{
-  items: SelectItem[];
-  onSubmit: (items: SelectItem[]) => void;
-}>;
 
 type JSXElement = React.ReactElement;
 
@@ -23,15 +17,38 @@ interface SelectItem {
 }
 
 export function CommentSelector({ comments, onSelect, title }: CommentSelectorProps): JSXElement {
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [currentIndex, setCurrentIndex] = useState(0);
+
   const items: SelectItem[] = comments.map((comment) => ({
-    label: formatCommentLabel(comment),
+    label: formatCommentLabel(comment, selectedIds.has(comment.id)),
     value: comment.id.toString(),
   }));
 
-  const handleSubmit = (selectedItems: SelectItem[]) => {
-    const selectedCommentIds = selectedItems.map((item) => parseInt(item.value, 10));
-    const selectedComments = comments.filter((comment) => selectedCommentIds.includes(comment.id));
-    onSelect(selectedComments);
+  useInput((input, key) => {
+    if (input === " ") {
+      // Toggle selection with space key
+      const commentId = parseInt(items[currentIndex]?.value || "0", 10);
+      const newSelectedIds = new Set(selectedIds);
+
+      if (newSelectedIds.has(commentId)) {
+        newSelectedIds.delete(commentId);
+      } else {
+        newSelectedIds.add(commentId);
+      }
+
+      setSelectedIds(newSelectedIds);
+    } else if (key.return) {
+      // Submit with enter key
+      const selectedComments = comments.filter((comment) => selectedIds.has(comment.id));
+      onSelect(selectedComments);
+    }
+  });
+
+  const handleSelect = (item: SelectItem) => {
+    // Update current index when navigating
+    const index = items.findIndex((i) => i.value === item.value);
+    setCurrentIndex(index);
   };
 
   return (
@@ -42,14 +59,16 @@ export function CommentSelector({ comments, onSelect, title }: CommentSelectorPr
       <Text color="gray">
         Use arrow keys to navigate, space to toggle selection, enter to submit
       </Text>
+      <Text color="yellow">Selected: {selectedIds.size} comment(s)</Text>
       <Box marginTop={1}>
-        <MultiSelectComponent items={items} onSubmit={handleSubmit} />
+        <SelectInput items={items} onSelect={handleSelect} />
       </Box>
     </Box>
   );
 }
 
-function formatCommentLabel(comment: FilteredComment): string {
+function formatCommentLabel(comment: FilteredComment, isSelected: boolean): string {
+  const prefix = isSelected ? "☑️ " : "☐ ";
   const path = comment.path ? `${comment.path}` : "General";
   const line = comment.line || comment.startLine ? `:L${comment.line || comment.startLine}` : "";
   const preview = comment.body
@@ -58,7 +77,7 @@ function formatCommentLabel(comment: FilteredComment): string {
     .substring(0, 50);
   const truncated = preview.length === 50 ? "..." : "";
 
-  return `${path}${line} - ${preview}${truncated}`;
+  return `${prefix}${path}${line} - ${preview}${truncated}`;
 }
 
 export async function showCommentSelector(

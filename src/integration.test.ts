@@ -286,8 +286,7 @@ describe("Integration Tests", () => {
     }
   });
 
-  it.skip("should test that CLI command modules can be imported", async () => {
-    // Skip this test due to ESM compatibility issues with ink-multi-select
+  it("should test that CLI command modules can be imported", async () => {
     const modules = await Promise.all([
       import("./cli/commands/main.js"),
       import("./cli/commands/resolve.js"),

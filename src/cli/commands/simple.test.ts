@@ -43,8 +43,7 @@ describe.skip("CLI Entry Point", () => {
 
 // Test the component helper functions
 describe("CommentSelector Helper Functions", () => {
-  it.skip("should import showCommentSelector function", async () => {
-    // Skip this test due to ESM compatibility issues with ink-multi-select
+  it("should import showCommentSelector function", async () => {
     const { showCommentSelector } = await import("../../components/CommentSelector.js");
     expect(typeof showCommentSelector).toBe("function");
   });
