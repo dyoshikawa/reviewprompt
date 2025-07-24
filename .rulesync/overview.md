@@ -40,7 +40,7 @@ ReviewPrompt is a GitHub PR review comment aggregation CLI tool that extracts AI
 
 ### Key Features
 
-1. **Comment Extraction**: Fetches PR review comments containing specified mentions (default: `@ai`)
+1. **Comment Extraction**: Fetches PR review comments containing specified mentions (default: `[ai]`)
 2. **Interactive Mode**: Allows users to select specific comments via a TUI interface
 3. **Prompt Generation**: Converts selected comments into structured AI prompts with file context
 4. **Comment Management**: Can resolve or delete processed comments
@@ -72,7 +72,7 @@ ReviewPrompt is a GitHub PR review comment aggregation CLI tool that extracts AI
 ### Configuration
 
 - Uses environment variable `GITHUB_TOKEN` for API authentication
-- Supports custom mention filtering (default: `@ai`)
+- Supports custom mention filtering (default: `[ai]`)
 - Multiple output modes: console, clipboard
 - Interactive and batch processing modes
 
