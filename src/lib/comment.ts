@@ -39,8 +39,8 @@ export function formatCommentForPrompt(comment: FilteredComment): string {
         ? `L${comment.startLine}-L${comment.line}`
         : `L${comment.line || comment.startLine}`;
 
-    return `# ./${comment.path}:${lineInfo}\n# ${cleanBody}`;
+    return `./${comment.path}:${lineInfo}\n${cleanBody}`;
   }
 
-  return `# ${cleanBody}`;
+  return `${cleanBody}`;
 }

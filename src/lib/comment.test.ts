@@ -165,7 +165,7 @@ describe("formatCommentForPrompt", () => {
     };
 
     const result = formatCommentForPrompt(comment);
-    expect(result).toBe("# Fix this bug");
+    expect(result).toBe("Fix this bug");
   });
 
   it("should format comment with path and single line", () => {
@@ -183,7 +183,7 @@ describe("formatCommentForPrompt", () => {
     };
 
     const result = formatCommentForPrompt(comment);
-    expect(result).toBe("# ./src/test.ts:L42\n# Fix this bug");
+    expect(result).toBe("./src/test.ts:L42\nFix this bug");
   });
 
   it("should format comment with path and line range", () => {
@@ -202,7 +202,7 @@ describe("formatCommentForPrompt", () => {
     };
 
     const result = formatCommentForPrompt(comment);
-    expect(result).toBe("# ./src/test.ts:L42-L45\n# Fix this bug");
+    expect(result).toBe("./src/test.ts:L42-L45\nFix this bug");
   });
 
   it("should format comment with path and same start/end line", () => {
@@ -221,7 +221,7 @@ describe("formatCommentForPrompt", () => {
     };
 
     const result = formatCommentForPrompt(comment);
-    expect(result).toBe("# ./src/test.ts:L42\n# Fix this bug");
+    expect(result).toBe("./src/test.ts:L42\nFix this bug");
   });
 
   it("should format comment with path and only start line", () => {
@@ -239,7 +239,7 @@ describe("formatCommentForPrompt", () => {
     };
 
     const result = formatCommentForPrompt(comment);
-    expect(result).toBe("# ./src/test.ts:L42\n# Fix this bug");
+    expect(result).toBe("./src/test.ts:L42\nFix this bug");
   });
 
   it("should not include path info when path exists but no line info", () => {
@@ -256,6 +256,6 @@ describe("formatCommentForPrompt", () => {
     };
 
     const result = formatCommentForPrompt(comment);
-    expect(result).toBe("# Fix this bug");
+    expect(result).toBe("Fix this bug");
   });
 });

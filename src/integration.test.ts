@@ -74,16 +74,14 @@ describe("Integration Tests", () => {
     // Step 2: Format comments for prompt
     const formattedComments = filteredComments.map(formatCommentForPrompt);
     expect(formattedComments[0]).toBe(
-      "# ./src/auth.ts:L40-L42\n# Fix this bug in the authentication logic",
+      "./src/auth.ts:L40-L42\nFix this bug in the authentication logic",
     );
-    expect(formattedComments[1]).toBe(
-      "# ./src/utils.ts:L25\n# Add unit tests for this new function",
-    );
+    expect(formattedComments[1]).toBe("./src/utils.ts:L25\nAdd unit tests for this new function");
 
     // Step 3: Build final prompt
     const prompt = buildPrompt(filteredComments);
     expect(prompt).toBe(
-      "# ./src/auth.ts:L40-L42\n# Fix this bug in the authentication logic\n# =====\n# ./src/utils.ts:L25\n# Add unit tests for this new function",
+      "./src/auth.ts:L40-L42\nFix this bug in the authentication logic\n=====\n./src/utils.ts:L25\nAdd unit tests for this new function",
     );
 
     // Step 4: Display prompt
@@ -206,9 +204,9 @@ describe("Integration Tests", () => {
 
     const formatted = testComments.map(formatCommentForPrompt);
 
-    expect(formatted[0]).toBe("# ./src/test.ts:L42\n# Single line comment");
-    expect(formatted[1]).toBe("# ./src/test.ts:L42-L45\n# Range comment");
-    expect(formatted[2]).toBe("# General comment");
+    expect(formatted[0]).toBe("./src/test.ts:L42\nSingle line comment");
+    expect(formatted[1]).toBe("./src/test.ts:L42-L45\nRange comment");
+    expect(formatted[2]).toBe("General comment");
   });
 
   it("should test command option combinations", () => {
