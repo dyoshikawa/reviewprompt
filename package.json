@@ -1,6 +1,6 @@
 {
 	"name": "reviewprompt",
-	"version": "0.5.0",
+	"version": "0.6.0",
 	"description": "Unified AI rules management CLI tool that generates configuration files for various AI development tools",
 	"keywords": [
 		"ai",
@@ -64,6 +64,7 @@
 		"commander": "14.0.0",
 		"gray-matter": "4.0.3",
 		"ink": "6.0.1",
+		"ink-multi-select": "2.0.0",
 		"ink-select-input": "6.2.0",
 		"js-yaml": "4.1.0",
 		"marked": "15.0.12",
