@@ -9,7 +9,7 @@ export async function executeResolveCommand(prUrl: string, options: CliOptions):
     const prInfo = client.parsePRUrl(prUrl);
 
     const comments = await client.getReviewComments(prInfo);
-    const mention = options.mention || "@ai";
+    const mention = options.mention || "[ai]";
     const filteredComments = filterCommentsByMention(comments, mention);
 
     if (filteredComments.length === 0) {

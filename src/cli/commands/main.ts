@@ -11,7 +11,7 @@ export async function executeMainCommand(prUrl: string, options: CliOptions): Pr
     const prInfo: PRInfo = client.parsePRUrl(prUrl);
 
     const comments = await client.getReviewComments(prInfo);
-    const mention = options.mention || "@ai";
+    const mention = options.mention || "[ai]";
     const filteredComments = filterCommentsByMention(comments, mention);
 
     if (filteredComments.length === 0) {

@@ -2,7 +2,7 @@ import type { FilteredComment, PRComment } from "./types.js";
 
 export function filterCommentsByMention(
   comments: PRComment[],
-  mention: string = "@ai",
+  mention: string = "[ai]",
 ): FilteredComment[] {
   return comments
     .filter((comment) => comment.body.includes(mention))
@@ -22,9 +22,11 @@ export function filterCommentsByMention(
     }));
 }
 
-export function cleanCommentBody(body: string, mention: string = "@ai"): string {
+export function cleanCommentBody(body: string, mention: string = "[ai]"): string {
+  // Escape special regex characters in the mention string
+  const escapedMention = mention.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   return body
-    .replace(new RegExp(mention, "g"), "")
+    .replace(new RegExp(escapedMention, "g"), "")
     .trim()
     .replace(/^\s*\n+/, "")
     .replace(/\n+\s*$/, "");
