@@ -1,6 +1,6 @@
 {
 	"name": "reviewprompt",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"description": "Unified AI rules management CLI tool that generates configuration files for various AI development tools",
 	"keywords": [
 		"ai",
