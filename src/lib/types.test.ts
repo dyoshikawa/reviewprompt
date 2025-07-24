@@ -61,13 +61,13 @@ describe("Type definitions", () => {
       interactive: true,
       resolve: false,
       delete: false,
-      mention: "@ai",
+      mention: "[ai]",
       clipboard: true,
       all: false,
     };
 
     expect(cliOptions.interactive).toBe(true);
-    expect(cliOptions.mention).toBe("@ai");
+    expect(cliOptions.mention).toBe("[ai]");
     expect(cliOptions.clipboard).toBe(true);
   });
 
@@ -211,7 +211,7 @@ describe("Type definitions", () => {
   it("should handle complex PromptSection scenarios", () => {
     const commentWithAllFields: FilteredComment = {
       id: 1,
-      body: "@ai Complex comment with all fields",
+      body: "[ai] Complex comment with all fields",
       path: "src/complex.ts",
       line: 100,
       startLine: 95,

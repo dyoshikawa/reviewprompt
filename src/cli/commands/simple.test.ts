@@ -52,7 +52,7 @@ describe("CommentSelector Helper Functions", () => {
     // Test the utility function logic directly
     const comment = {
       id: 1,
-      body: "@ai Fix this issue in the code",
+      body: "[ai] Fix this issue in the code",
       path: "src/test.ts",
       line: 42,
       user: "testuser",
@@ -67,7 +67,10 @@ describe("CommentSelector Helper Functions", () => {
     const prefix = "☐ ";
     const path = comment.path || "General";
     const line = comment.line ? `:L${comment.line}` : "";
-    const preview = comment.body.replace(/@ai/g, "").trim().substring(0, 50);
+    const preview = comment.body
+      .replace(/\[ai\]/g, "")
+      .trim()
+      .substring(0, 50);
     const expected = `${prefix}${path}${line} - ${preview}`;
 
     expect(expected).toBe("☐ src/test.ts:L42 - Fix this issue in the code");
@@ -76,7 +79,7 @@ describe("CommentSelector Helper Functions", () => {
   it("should handle truncation in comment labels", () => {
     const longComment = {
       id: 1,
-      body: "@ai " + "a".repeat(100), // Long body that will be truncated
+      body: "[ai] " + "a".repeat(100), // Long body that will be truncated
       path: "src/test.ts",
       user: "testuser",
       htmlUrl: "https://github.com/test/repo/pull/1#discussion_r123",
@@ -86,7 +89,10 @@ describe("CommentSelector Helper Functions", () => {
       updatedAt: "2023-01-01T00:00:00Z",
     };
 
-    const preview = longComment.body.replace(/@ai/g, "").trim().substring(0, 50);
+    const preview = longComment.body
+      .replace(/\[ai\]/g, "")
+      .trim()
+      .substring(0, 50);
     const truncated = preview.length === 50 ? "..." : "";
 
     expect(preview.length).toBe(50);
@@ -96,7 +102,7 @@ describe("CommentSelector Helper Functions", () => {
   it("should handle comments without path info", () => {
     const comment = {
       id: 1,
-      body: "@ai General comment",
+      body: "[ai] General comment",
       user: "testuser",
       htmlUrl: "https://github.com/test/repo/pull/1#discussion_r123",
       position: null,

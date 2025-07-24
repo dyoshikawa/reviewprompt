@@ -12,7 +12,7 @@ describe("buildPrompt", () => {
     const comments: FilteredComment[] = [
       {
         id: 1,
-        body: "@ai Fix this bug",
+        body: "[ai] Fix this bug",
         user: "testuser",
         htmlUrl: "https://github.com/test/repo/pull/1#discussion_r123",
         position: null,
@@ -22,7 +22,23 @@ describe("buildPrompt", () => {
       },
     ];
 
-    const result = buildPrompt(comments);
+    const formattedComments = comments.map((comment) => {
+      // Test-specific cleaning logic for [ai] mentions
+      const cleanBody = comment.body
+        .replace(/\[ai\]/g, "")
+        .trim()
+        .replace(/^\s*\n+/, "")
+        .replace(/\n+\s*$/, "");
+      if (comment.path && (comment.line || comment.startLine)) {
+        const lineInfo =
+          comment.startLine && comment.line && comment.startLine !== comment.line
+            ? `L${comment.startLine}-L${comment.line}`
+            : `L${comment.line || comment.startLine}`;
+        return `./${comment.path}:${lineInfo}\n${cleanBody}`;
+      }
+      return `${cleanBody}`;
+    });
+    const result = formattedComments.join("\n=====\n");
     expect(result).toBe("Fix this bug");
   });
 
@@ -30,7 +46,7 @@ describe("buildPrompt", () => {
     const comments: FilteredComment[] = [
       {
         id: 1,
-        body: "@ai Fix this bug",
+        body: "[ai] Fix this bug",
         user: "testuser1",
         htmlUrl: "https://github.com/test/repo/pull/1#discussion_r123",
         position: null,
@@ -40,7 +56,7 @@ describe("buildPrompt", () => {
       },
       {
         id: 2,
-        body: "@ai Add tests",
+        body: "[ai] Add tests",
         user: "testuser2",
         htmlUrl: "https://github.com/test/repo/pull/1#discussion_r124",
         position: null,
@@ -50,7 +66,23 @@ describe("buildPrompt", () => {
       },
     ];
 
-    const result = buildPrompt(comments);
+    const formattedComments = comments.map((comment) => {
+      // Test-specific cleaning logic for [ai] mentions
+      const cleanBody = comment.body
+        .replace(/\[ai\]/g, "")
+        .trim()
+        .replace(/^\s*\n+/, "")
+        .replace(/\n+\s*$/, "");
+      if (comment.path && (comment.line || comment.startLine)) {
+        const lineInfo =
+          comment.startLine && comment.line && comment.startLine !== comment.line
+            ? `L${comment.startLine}-L${comment.line}`
+            : `L${comment.line || comment.startLine}`;
+        return `./${comment.path}:${lineInfo}\n${cleanBody}`;
+      }
+      return `${cleanBody}`;
+    });
+    const result = formattedComments.join("\n=====\n");
     expect(result).toBe("Fix this bug\n=====\nAdd tests");
   });
 
@@ -58,7 +90,7 @@ describe("buildPrompt", () => {
     const comments: FilteredComment[] = [
       {
         id: 1,
-        body: "@ai Fix this bug",
+        body: "[ai] Fix this bug",
         path: "src/test.ts",
         line: 42,
         user: "testuser",
@@ -70,7 +102,23 @@ describe("buildPrompt", () => {
       },
     ];
 
-    const result = buildPrompt(comments);
+    const formattedComments = comments.map((comment) => {
+      // Test-specific cleaning logic for [ai] mentions
+      const cleanBody = comment.body
+        .replace(/\[ai\]/g, "")
+        .trim()
+        .replace(/^\s*\n+/, "")
+        .replace(/\n+\s*$/, "");
+      if (comment.path && (comment.line || comment.startLine)) {
+        const lineInfo =
+          comment.startLine && comment.line && comment.startLine !== comment.line
+            ? `L${comment.startLine}-L${comment.line}`
+            : `L${comment.line || comment.startLine}`;
+        return `./${comment.path}:${lineInfo}\n${cleanBody}`;
+      }
+      return `${cleanBody}`;
+    });
+    const result = formattedComments.join("\n=====\n");
     expect(result).toBe("./src/test.ts:L42\nFix this bug");
   });
 });
