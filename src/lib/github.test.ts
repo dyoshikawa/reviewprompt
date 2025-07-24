@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createAuthErrorMessage, getGitHubToken } from "../utils/auth.js";
 import { GitHubClient } from "./github.js";
 
 // Mock functions
@@ -20,11 +21,21 @@ vi.mock("@octokit/rest", () => ({
   })),
 }));
 
+// Mock the auth utilities
+vi.mock("../utils/auth.js", () => ({
+  getGitHubToken: vi.fn(),
+  createAuthErrorMessage: vi.fn(),
+}));
+
 describe("GitHubClient", () => {
   let client: GitHubClient;
 
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(getGitHubToken).mockReturnValue("test-token");
+    vi.mocked(createAuthErrorMessage).mockImplementation(
+      (error) => `GitHub API error: ${error.message}`,
+    );
     client = new GitHubClient("test-token");
   });
 
@@ -84,19 +95,20 @@ describe("GitHubClient", () => {
       expect(testClient).toBeInstanceOf(GitHubClient);
     });
 
-    it("should use environment token when no token provided", () => {
-      const originalToken = process.env.GITHUB_TOKEN;
-      process.env.GITHUB_TOKEN = "env-token";
+    it("should use getGitHubToken when no token provided", () => {
+      vi.mocked(getGitHubToken).mockReturnValue("auth-token");
 
       const testClient = new GitHubClient();
       expect(testClient).toBeInstanceOf(GitHubClient);
+      expect(getGitHubToken).toHaveBeenCalled();
+    });
 
-      // Restore original environment
-      if (originalToken) {
-        process.env.GITHUB_TOKEN = originalToken;
-      } else {
-        delete process.env.GITHUB_TOKEN;
-      }
+    it("should throw error when no token is available", () => {
+      vi.mocked(getGitHubToken).mockReturnValue(undefined);
+
+      expect(() => new GitHubClient()).toThrow(
+        "GitHub authentication required. Please set GITHUB_TOKEN environment variable or authenticate with GitHub CLI (gh auth login).",
+      );
     });
   });
 
@@ -188,6 +200,20 @@ describe("GitHubClient", () => {
         createdAt: "2023-01-01T01:00:00Z",
         updatedAt: "2023-01-01T01:00:00Z",
       });
+    });
+
+    it("should throw authentication error for auth issues", async () => {
+      const mockError = new Error("Bad credentials");
+      vi.mocked(createAuthErrorMessage).mockReturnValue(
+        "GitHub authentication failed. Please ensure you have a valid token",
+      );
+      mockListReviewComments.mockRejectedValueOnce(mockError);
+
+      const prInfo = { owner: "test", repo: "repo", pullNumber: 1 };
+
+      await expect(client.getReviewComments(prInfo)).rejects.toThrow(
+        "GitHub authentication failed. Please ensure you have a valid token",
+      );
     });
 
     it("should throw error with Error instance", async () => {

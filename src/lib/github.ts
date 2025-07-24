@@ -1,12 +1,20 @@
 import { Octokit } from "@octokit/rest";
+import { createAuthErrorMessage, getGitHubToken } from "../utils/auth.js";
 import type { PRComment, PRInfo } from "./types.js";
 
 export class GitHubClient {
   private octokit: Octokit;
 
   constructor(token?: string) {
+    const authToken = token || getGitHubToken();
+    if (!authToken) {
+      throw new Error(
+        "GitHub authentication required. Please set GITHUB_TOKEN environment variable or authenticate with GitHub CLI (gh auth login).",
+      );
+    }
+
     this.octokit = new Octokit({
-      auth: token || process.env.GITHUB_TOKEN,
+      auth: authToken,
     });
   }
 
@@ -49,6 +57,10 @@ export class GitHubClient {
       }));
     } catch (error) {
       if (error instanceof Error) {
+        const authError = createAuthErrorMessage(error);
+        if (authError !== `GitHub API error: ${error.message}`) {
+          throw new Error(authError);
+        }
         throw new Error(`Failed to fetch PR comments: ${error.message}`);
       }
       throw new Error("Failed to fetch PR comments");
@@ -65,6 +77,10 @@ export class GitHubClient {
       });
     } catch (error) {
       if (error instanceof Error) {
+        const authError = createAuthErrorMessage(error);
+        if (authError !== `GitHub API error: ${error.message}`) {
+          throw new Error(authError);
+        }
         throw new Error(`Failed to resolve comment: ${error.message}`);
       }
       throw new Error("Failed to resolve comment");
@@ -80,6 +96,10 @@ export class GitHubClient {
       });
     } catch (error) {
       if (error instanceof Error) {
+        const authError = createAuthErrorMessage(error);
+        if (authError !== `GitHub API error: ${error.message}`) {
+          throw new Error(authError);
+        }
         throw new Error(`Failed to delete comment: ${error.message}`);
       }
       throw new Error("Failed to delete comment");
