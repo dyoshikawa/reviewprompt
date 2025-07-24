@@ -3,6 +3,20 @@ import { Octokit } from "@octokit/rest";
 import { createAuthErrorMessage, getGithubToken } from "../utils/auth.js";
 import type { PRComment, PRInfo } from "./types.js";
 
+// Helper function to safely access nested properties
+const getNestedValue = (obj: unknown, path: string[]): unknown => {
+  let current = obj;
+  for (const key of path) {
+    if (!current || typeof current !== "object" || !(key in current)) {
+      return undefined;
+    }
+    // eslint-disable-next-line no-type-assertion/no-type-assertion
+    const currentRecord = current as Record<string, unknown>;
+    current = currentRecord[key];
+  }
+  return current;
+};
+
 export class GitHubClient {
   private octokit: Octokit;
   private graphqlWithAuth: typeof graphql;
@@ -77,12 +91,99 @@ export class GitHubClient {
 
   public async resolveComment(prInfo: PRInfo, commentId: number): Promise<void> {
     try {
-      // First, get the pull request review comment to find the thread ID
+      // First, get the pull request review comment to get its node_id
       const { data: comment } = await this.octokit.rest.pulls.getReviewComment({
         owner: prInfo.owner,
         repo: prInfo.repo,
         comment_id: commentId,
       });
+
+      // Use GraphQL to find the review thread containing this comment
+      const query = `
+        query($owner: String!, $repo: String!, $number: Int!) {
+          repository(owner: $owner, name: $repo) {
+            pullRequest(number: $number) {
+              reviewThreads(first: 100) {
+                nodes {
+                  id
+                  comments(first: 100) {
+                    nodes {
+                      id
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      `;
+
+      const queryResult = await this.graphqlWithAuth(query, {
+        owner: prInfo.owner,
+        repo: prInfo.repo,
+        number: prInfo.pullNumber,
+      });
+
+      // Type-safe navigation of GraphQL response
+      if (!queryResult || typeof queryResult !== "object") {
+        throw new Error("Invalid GraphQL response structure");
+      }
+
+      const reviewThreadsNodes = getNestedValue(queryResult, [
+        "repository",
+        "pullRequest",
+        "reviewThreads",
+        "nodes",
+      ]);
+
+      if (!Array.isArray(reviewThreadsNodes)) {
+        throw new Error("Invalid GraphQL response structure");
+      }
+
+      // Find the thread that contains our comment
+      let threadId: string | null = null;
+
+      for (const thread of reviewThreadsNodes) {
+        if (!thread || typeof thread !== "object") continue;
+
+        // eslint-disable-next-line no-type-assertion/no-type-assertion
+        const threadObj = thread as Record<string, unknown>;
+
+        // Get thread id
+        const threadIdValue = threadObj.id;
+        if (typeof threadIdValue !== "string") continue;
+
+        // Get comments
+        const comments = threadObj.comments;
+        if (!comments || typeof comments !== "object") continue;
+
+        // eslint-disable-next-line no-type-assertion/no-type-assertion
+        const commentsObj = comments as Record<string, unknown>;
+        const nodes = commentsObj.nodes;
+        if (!Array.isArray(nodes)) continue;
+
+        // Extract comment IDs
+        const commentIds: string[] = [];
+        for (const node of nodes) {
+          if (node && typeof node === "object" && "id" in node) {
+            // eslint-disable-next-line no-type-assertion/no-type-assertion
+            const nodeObj = node as Record<string, unknown>;
+            if (typeof nodeObj.id === "string") {
+              commentIds.push(nodeObj.id);
+            }
+          }
+        }
+
+        // Check if this thread contains our comment
+        if (commentIds.includes(comment.node_id)) {
+          threadId = threadIdValue;
+          break;
+        }
+      }
+
+      if (!threadId) {
+        throw new Error(`Could not find review thread for comment ${commentId}`);
+      }
 
       // Use GraphQL to resolve the review thread
       const mutation = `
@@ -96,9 +197,8 @@ export class GitHubClient {
         }
       `;
 
-      // The thread ID is the node_id of the comment
       await this.graphqlWithAuth(mutation, {
-        threadId: comment.node_id,
+        threadId: threadId,
       });
     } catch (error) {
       if (error instanceof Error) {

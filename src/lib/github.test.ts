@@ -249,12 +249,32 @@ describe("GitHubClient", () => {
   describe("resolveComment", () => {
     it("should resolve comment successfully", async () => {
       mockGetReviewComment.mockResolvedValueOnce({
-        data: { node_id: "MDEyOklzc3VlQ29tbWVudDEyMzQ1Njc=" },
+        data: { node_id: "TEST_COMMENT_NODE_ID_123" },
       });
+
+      // Mock the query to find review threads
+      mockGraphql.mockResolvedValueOnce({
+        repository: {
+          pullRequest: {
+            reviewThreads: {
+              nodes: [
+                {
+                  id: "TEST_THREAD_ID_456",
+                  comments: {
+                    nodes: [{ id: "TEST_COMMENT_NODE_ID_123" }],
+                  },
+                },
+              ],
+            },
+          },
+        },
+      });
+
+      // Mock the mutation to resolve the thread
       mockGraphql.mockResolvedValueOnce({
         resolveReviewThread: {
           thread: {
-            id: "MDEyOklzc3VlQ29tbWVudDEyMzQ1Njc=",
+            id: "TEST_THREAD_ID_456",
             isResolved: true,
           },
         },
@@ -269,15 +289,25 @@ describe("GitHubClient", () => {
         comment_id: 123,
       });
 
-      expect(mockGraphql).toHaveBeenCalledWith(expect.stringContaining("resolveReviewThread"), {
-        threadId: "MDEyOklzc3VlQ29tbWVudDEyMzQ1Njc=",
+      expect(mockGraphql).toHaveBeenCalledTimes(2);
+      expect(mockGraphql).toHaveBeenNthCalledWith(1, expect.stringContaining("query"), {
+        owner: "test",
+        repo: "repo",
+        number: 1,
       });
+      expect(mockGraphql).toHaveBeenNthCalledWith(
+        2,
+        expect.stringContaining("resolveReviewThread"),
+        {
+          threadId: "TEST_THREAD_ID_456",
+        },
+      );
     });
 
     it("should throw error with Error instance", async () => {
       const mockError = new Error("Not found");
       mockGetReviewComment.mockResolvedValueOnce({
-        data: { node_id: "MDEyOklzc3VlQ29tbWVudDEyMzQ1Njc=" },
+        data: { node_id: "TEST_COMMENT_NODE_ID_123" },
       });
       mockGraphql.mockRejectedValueOnce(mockError);
 
@@ -290,7 +320,7 @@ describe("GitHubClient", () => {
 
     it("should throw generic error with non-Error instance", async () => {
       mockGetReviewComment.mockResolvedValueOnce({
-        data: { node_id: "MDEyOklzc3VlQ29tbWVudDEyMzQ1Njc=" },
+        data: { node_id: "TEST_COMMENT_NODE_ID_123" },
       });
       mockGraphql.mockRejectedValueOnce("String error");
 
