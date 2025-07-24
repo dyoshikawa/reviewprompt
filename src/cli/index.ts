@@ -10,7 +10,7 @@ const program = new Command();
 program
   .name("reviewprompt")
   .description("GitHub PR review comments to AI prompt CLI tool")
-  .version("0.9.0");
+  .version("0.10.0");
 
 program
   .argument("<pr-url>", "GitHub PR URL")
