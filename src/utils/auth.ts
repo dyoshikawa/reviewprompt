@@ -1,7 +1,7 @@
 // Forked from https://github.com/yoshiko-pg/difit/blob/main/src/cli/utils.ts
 import { execSync } from "node:child_process";
 
-export function getGitHubToken(): string | undefined {
+export function getGithubToken(): string | undefined {
   if (process.env.GITHUB_TOKEN) {
     return process.env.GITHUB_TOKEN;
   }

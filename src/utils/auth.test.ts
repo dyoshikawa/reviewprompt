@@ -1,12 +1,12 @@
 import { execSync } from "node:child_process";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { createAuthErrorMessage, getGitHubToken } from "./auth.js";
+import { createAuthErrorMessage, getGithubToken } from "./auth.js";
 
 vi.mock("node:child_process");
 
 const mockExecSync = vi.mocked(execSync);
 
-describe("getGitHubToken", () => {
+describe("getGithubToken", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     delete process.env.GITHUB_TOKEN;
@@ -15,7 +15,7 @@ describe("getGitHubToken", () => {
   it("should return GITHUB_TOKEN from environment variable", () => {
     process.env.GITHUB_TOKEN = "env-token-123";
 
-    const result = getGitHubToken();
+    const result = getGithubToken();
 
     expect(result).toBe("env-token-123");
     expect(mockExecSync).not.toHaveBeenCalled();
@@ -24,7 +24,7 @@ describe("getGitHubToken", () => {
   it("should fallback to GitHub CLI when environment variable is not set", () => {
     mockExecSync.mockReturnValueOnce("cli-token-456\n");
 
-    const result = getGitHubToken();
+    const result = getGithubToken();
 
     expect(result).toBe("cli-token-456");
     expect(mockExecSync).toHaveBeenCalledWith("gh auth token", {
@@ -36,7 +36,7 @@ describe("getGitHubToken", () => {
   it("should trim whitespace from GitHub CLI output", () => {
     mockExecSync.mockReturnValueOnce("  cli-token-789  \n");
 
-    const result = getGitHubToken();
+    const result = getGithubToken();
 
     expect(result).toBe("cli-token-789");
   });
@@ -46,7 +46,7 @@ describe("getGitHubToken", () => {
       throw new Error("GitHub CLI not found");
     });
 
-    const result = getGitHubToken();
+    const result = getGithubToken();
 
     expect(result).toBeUndefined();
   });
@@ -55,7 +55,7 @@ describe("getGitHubToken", () => {
     process.env.GITHUB_TOKEN = "env-token";
     mockExecSync.mockReturnValueOnce("cli-token");
 
-    const result = getGitHubToken();
+    const result = getGithubToken();
 
     expect(result).toBe("env-token");
     expect(mockExecSync).not.toHaveBeenCalled();

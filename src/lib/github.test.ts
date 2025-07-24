@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { createAuthErrorMessage, getGitHubToken } from "../utils/auth.js";
+import { createAuthErrorMessage, getGithubToken } from "../utils/auth.js";
 import { GitHubClient } from "./github.js";
 
 // Mock functions
@@ -23,7 +23,7 @@ vi.mock("@octokit/rest", () => ({
 
 // Mock the auth utilities
 vi.mock("../utils/auth.js", () => ({
-  getGitHubToken: vi.fn(),
+  getGithubToken: vi.fn(),
   createAuthErrorMessage: vi.fn(),
 }));
 
@@ -32,7 +32,7 @@ describe("GitHubClient", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(getGitHubToken).mockReturnValue("test-token");
+    vi.mocked(getGithubToken).mockReturnValue("test-token");
     vi.mocked(createAuthErrorMessage).mockImplementation(
       (error) => `GitHub API error: ${error.message}`,
     );
@@ -95,16 +95,16 @@ describe("GitHubClient", () => {
       expect(testClient).toBeInstanceOf(GitHubClient);
     });
 
-    it("should use getGitHubToken when no token provided", () => {
-      vi.mocked(getGitHubToken).mockReturnValue("auth-token");
+    it("should use getGithubToken when no token provided", () => {
+      vi.mocked(getGithubToken).mockReturnValue("auth-token");
 
       const testClient = new GitHubClient();
       expect(testClient).toBeInstanceOf(GitHubClient);
-      expect(getGitHubToken).toHaveBeenCalled();
+      expect(getGithubToken).toHaveBeenCalled();
     });
 
     it("should throw error when no token is available", () => {
-      vi.mocked(getGitHubToken).mockReturnValue(undefined);
+      vi.mocked(getGithubToken).mockReturnValue(undefined);
 
       expect(() => new GitHubClient()).toThrow(
         "GitHub authentication required. Please set GITHUB_TOKEN environment variable or authenticate with GitHub CLI (gh auth login).",

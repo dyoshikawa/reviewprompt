@@ -1,12 +1,12 @@
 import { Octokit } from "@octokit/rest";
-import { createAuthErrorMessage, getGitHubToken } from "../utils/auth.js";
+import { createAuthErrorMessage, getGithubToken } from "../utils/auth.js";
 import type { PRComment, PRInfo } from "./types.js";
 
 export class GitHubClient {
   private octokit: Octokit;
 
   constructor(token?: string) {
-    const authToken = token || getGitHubToken();
+    const authToken = token || getGithubToken();
     if (!authToken) {
       throw new Error(
         "GitHub authentication required. Please set GITHUB_TOKEN environment variable or authenticate with GitHub CLI (gh auth login).",
