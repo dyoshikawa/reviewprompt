@@ -57,6 +57,7 @@
 		"pre-commit": "pnpm exec lint-staged"
 	},
 	"dependencies": {
+		"@octokit/graphql": "9.0.1",
 		"@octokit/rest": "22.0.0",
 		"@types/react": "19.1.8",
 		"chokidar": "4.0.3",
