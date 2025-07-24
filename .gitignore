@@ -179,7 +179,6 @@ pnpm-lock.yaml
 **/.copilotignore
 **/CLAUDE.md
 **/.claude/memories/
-**/.claude/settings.json
 **/GEMINI.md
 **/.gemini/memories/
 **/.aiexclude
