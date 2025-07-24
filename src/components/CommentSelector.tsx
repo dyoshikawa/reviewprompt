@@ -51,6 +51,12 @@ export function CommentSelector({ comments, onSelect, title }: CommentSelectorPr
     setCurrentIndex(index);
   };
 
+  const handleHighlight = (item: SelectItem) => {
+    // Update current index when highlighting (arrow key navigation)
+    const index = items.findIndex((i) => i.value === item.value);
+    setCurrentIndex(index);
+  };
+
   return (
     <Box flexDirection="column">
       <Text color="cyan" bold>
@@ -61,7 +67,7 @@ export function CommentSelector({ comments, onSelect, title }: CommentSelectorPr
       </Text>
       <Text color="yellow">Selected: {selectedIds.size} comment(s)</Text>
       <Box marginTop={1}>
-        <SelectInput items={items} onSelect={handleSelect} />
+        <SelectInput items={items} onSelect={handleSelect} onHighlight={handleHighlight} />
       </Box>
     </Box>
   );

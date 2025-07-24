@@ -1,13 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { createAuthErrorMessage, getGithubToken } from "../utils/auth.js";
-import { GitHubClient } from "./github.js";
 
-// Mock functions
+// Mock functions - declare before any vi.mock calls
 const mockListReviewComments = vi.fn();
 const mockGetReviewComment = vi.fn();
 const mockUpdateReviewComment = vi.fn();
 const mockDeleteReviewComment = vi.fn();
 const mockGraphql = vi.fn();
+
+import { graphql } from "@octokit/graphql";
+import { createAuthErrorMessage, getGithubToken } from "../utils/auth.js";
+import { GitHubClient } from "./github.js";
 
 // Mock Octokit with proper implementation
 vi.mock("@octokit/rest", () => ({
@@ -25,11 +27,7 @@ vi.mock("@octokit/rest", () => ({
 }));
 
 // Mock GraphQL
-vi.mock("@octokit/graphql", () => ({
-  graphql: {
-    defaults: vi.fn().mockReturnValue(mockGraphql),
-  },
-}));
+vi.mock("@octokit/graphql");
 
 // Mock the auth utilities
 vi.mock("../utils/auth.js", () => ({
@@ -46,6 +44,8 @@ describe("GitHubClient", () => {
     vi.mocked(createAuthErrorMessage).mockImplementation(
       (error) => `GitHub API error: ${error.message}`,
     );
+    // Setup graphql mock
+    (graphql.defaults as any).mockReturnValue(mockGraphql);
     client = new GitHubClient("test-token");
   });
 
@@ -269,12 +269,9 @@ describe("GitHubClient", () => {
         comment_id: 123,
       });
 
-      expect(mockGraphql).toHaveBeenCalledWith(
-        expect.stringContaining("resolveReviewThread"),
-        {
-          threadId: "MDEyOklzc3VlQ29tbWVudDEyMzQ1Njc=",
-        },
-      );
+      expect(mockGraphql).toHaveBeenCalledWith(expect.stringContaining("resolveReviewThread"), {
+        threadId: "MDEyOklzc3VlQ29tbWVudDEyMzQ1Njc=",
+      });
     });
 
     it("should throw error with Error instance", async () => {
