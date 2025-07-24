@@ -69,11 +69,19 @@ export class GitHubClient {
 
   public async resolveComment(prInfo: PRInfo, commentId: number): Promise<void> {
     try {
+      // First get the current comment to preserve its content
+      const { data: comment } = await this.octokit.rest.pulls.getReviewComment({
+        owner: prInfo.owner,
+        repo: prInfo.repo,
+        comment_id: commentId,
+      });
+
+      // Keep the original content exactly as is
       await this.octokit.rest.pulls.updateReviewComment({
         owner: prInfo.owner,
         repo: prInfo.repo,
         comment_id: commentId,
-        body: "~~Resolved by reviewprompt~~",
+        body: comment.body,
       });
     } catch (error) {
       if (error instanceof Error) {

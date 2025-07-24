@@ -4,6 +4,7 @@ import { GitHubClient } from "./github.js";
 
 // Mock functions
 const mockListReviewComments = vi.fn();
+const mockGetReviewComment = vi.fn();
 const mockUpdateReviewComment = vi.fn();
 const mockDeleteReviewComment = vi.fn();
 
@@ -13,6 +14,7 @@ vi.mock("@octokit/rest", () => ({
     rest: {
       pulls: {
         listReviewComments: mockListReviewComments,
+        getReviewComment: mockGetReviewComment,
         updateReviewComment: mockUpdateReviewComment,
         deleteReviewComment: mockDeleteReviewComment,
       },
@@ -238,21 +240,34 @@ describe("GitHubClient", () => {
 
   describe("resolveComment", () => {
     it("should resolve comment successfully", async () => {
+      const originalBody = "This is the original comment [ai]";
+      mockGetReviewComment.mockResolvedValueOnce({
+        data: { body: originalBody },
+      });
       mockUpdateReviewComment.mockResolvedValueOnce({});
 
       const prInfo = { owner: "test", repo: "repo", pullNumber: 1 };
       await client.resolveComment(prInfo, 123);
 
+      expect(mockGetReviewComment).toHaveBeenCalledWith({
+        owner: "test",
+        repo: "repo",
+        comment_id: 123,
+      });
+
       expect(mockUpdateReviewComment).toHaveBeenCalledWith({
         owner: "test",
         repo: "repo",
         comment_id: 123,
-        body: "~~Resolved by reviewprompt~~",
+        body: originalBody,
       });
     });
 
     it("should throw error with Error instance", async () => {
       const mockError = new Error("Not found");
+      mockGetReviewComment.mockResolvedValueOnce({
+        data: { body: "Original comment" },
+      });
       mockUpdateReviewComment.mockRejectedValueOnce(mockError);
 
       const prInfo = { owner: "test", repo: "repo", pullNumber: 1 };
