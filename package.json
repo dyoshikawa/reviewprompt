@@ -1,6 +1,6 @@
 {
 	"name": "reviewprompt",
-	"version": "0.8.0",
+	"version": "0.9.0",
 	"description": "Unified AI rules management CLI tool that generates configuration files for various AI development tools",
 	"keywords": [
 		"ai",
@@ -57,6 +57,7 @@
 		"pre-commit": "pnpm exec lint-staged"
 	},
 	"dependencies": {
+		"@octokit/graphql": "9.0.1",
 		"@octokit/rest": "22.0.0",
 		"@types/react": "19.1.8",
 		"chokidar": "4.0.3",
