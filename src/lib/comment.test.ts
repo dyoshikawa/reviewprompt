@@ -90,6 +90,7 @@ describe("filterCommentsByMention", () => {
       diffHunk: undefined,
       createdAt: "2023-01-01T00:00:00Z",
       updatedAt: "2023-01-01T00:00:00Z",
+      isResolved: false,
     });
   });
 
@@ -110,6 +111,7 @@ describe("filterCommentsByMention", () => {
       diffHunk: "@@ -10,5 +10,8 @@",
       createdAt: "2023-01-01T00:00:00Z",
       updatedAt: "2023-01-01T00:00:00Z",
+      isResolved: false,
     });
   });
 });

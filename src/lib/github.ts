@@ -1,5 +1,4 @@
 import { graphql } from "@octokit/graphql";
-import { Octokit } from "@octokit/rest";
 import { createAuthErrorMessage, getGithubToken } from "../utils/auth.js";
 import type { PRComment, PRInfo } from "./types.js";
 
@@ -18,7 +17,6 @@ const getNestedValue = (obj: unknown, path: string[]): unknown => {
 };
 
 export class GitHubClient {
-  private octokit: Octokit;
   private graphqlWithAuth: typeof graphql;
 
   constructor(token?: string) {
@@ -28,10 +26,6 @@ export class GitHubClient {
         "GitHub authentication required. Please set GITHUB_TOKEN environment variable or authenticate with GitHub CLI (gh auth login).",
       );
     }
-
-    this.octokit = new Octokit({
-      auth: authToken,
-    });
 
     this.graphqlWithAuth = graphql.defaults({
       headers: {
@@ -55,28 +49,124 @@ export class GitHubClient {
 
   public async getReviewComments(prInfo: PRInfo): Promise<PRComment[]> {
     try {
-      const { data } = await this.octokit.rest.pulls.listReviewComments({
+      // Use GraphQL API to get all review comments with resolve status
+      const query = `
+        query($owner: String!, $repo: String!, $number: Int!) {
+          repository(owner: $owner, name: $repo) {
+            pullRequest(number: $number) {
+              reviewThreads(first: 100) {
+                nodes {
+                  id
+                  isResolved
+                  comments(first: 100) {
+                    nodes {
+                      id
+                      databaseId
+                      body
+                      path
+                      line
+                      startLine
+                      author {
+                        login
+                      }
+                      url
+                      position
+                      originalPosition
+                      diffHunk
+                      createdAt
+                      updatedAt
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      `;
+
+      const queryResult = await this.graphqlWithAuth(query, {
         owner: prInfo.owner,
         repo: prInfo.repo,
-        pull_number: prInfo.pullNumber,
+        number: prInfo.pullNumber,
       });
 
-      return data.map((comment) => ({
-        id: comment.id,
-        body: comment.body,
-        path: comment.path || undefined,
-        line: comment.line || undefined,
-        startLine: comment.start_line || undefined,
-        user: {
-          login: comment.user?.login || "unknown",
-        },
-        htmlUrl: comment.html_url,
-        position: comment.position || null,
-        originalPosition: comment.original_position || null,
-        diffHunk: comment.diff_hunk || undefined,
-        createdAt: comment.created_at,
-        updatedAt: comment.updated_at,
-      }));
+      const comments: PRComment[] = [];
+
+      if (queryResult && typeof queryResult === "object") {
+        const reviewThreadsNodes = getNestedValue(queryResult, [
+          "repository",
+          "pullRequest",
+          "reviewThreads",
+          "nodes",
+        ]);
+
+        if (Array.isArray(reviewThreadsNodes)) {
+          for (const thread of reviewThreadsNodes) {
+            if (!thread || typeof thread !== "object") continue;
+
+            // eslint-disable-next-line no-type-assertion/no-type-assertion
+            const threadObj = thread as Record<string, unknown>;
+            const isResolved = threadObj.isResolved === true;
+            const threadComments = threadObj.comments;
+
+            if (!threadComments || typeof threadComments !== "object") continue;
+
+            // eslint-disable-next-line no-type-assertion/no-type-assertion
+            const commentsObj = threadComments as Record<string, unknown>;
+            const nodes = commentsObj.nodes;
+
+            if (!Array.isArray(nodes)) continue;
+
+            for (const node of nodes) {
+              if (node && typeof node === "object") {
+                // eslint-disable-next-line no-type-assertion/no-type-assertion
+                const commentNode = node as Record<string, unknown>;
+
+                if (
+                  typeof commentNode.databaseId === "number" &&
+                  typeof commentNode.body === "string"
+                ) {
+                  comments.push({
+                    id: commentNode.databaseId,
+                    body: commentNode.body,
+                    path: typeof commentNode.path === "string" ? commentNode.path : undefined,
+                    line: typeof commentNode.line === "number" ? commentNode.line : undefined,
+                    startLine:
+                      typeof commentNode.startLine === "number" ? commentNode.startLine : undefined,
+                    user: {
+                      login:
+                        commentNode.author &&
+                        typeof commentNode.author === "object" &&
+                        "login" in commentNode.author &&
+                        // eslint-disable-next-line no-type-assertion/no-type-assertion
+                        typeof (commentNode.author as Record<string, unknown>).login === "string"
+                          ? // eslint-disable-next-line no-type-assertion/no-type-assertion
+                            ((commentNode.author as Record<string, unknown>).login as string)
+                          : "unknown",
+                    },
+                    htmlUrl: typeof commentNode.url === "string" ? commentNode.url : "",
+                    position:
+                      typeof commentNode.position === "number" ? commentNode.position : null,
+                    originalPosition:
+                      typeof commentNode.originalPosition === "number"
+                        ? commentNode.originalPosition
+                        : null,
+                    diffHunk:
+                      typeof commentNode.diffHunk === "string" ? commentNode.diffHunk : undefined,
+                    createdAt:
+                      typeof commentNode.createdAt === "string" ? commentNode.createdAt : "",
+                    updatedAt:
+                      typeof commentNode.updatedAt === "string" ? commentNode.updatedAt : "",
+                    isResolved,
+                  });
+                }
+              }
+            }
+          }
+        }
+      }
+
+      return comments;
     } catch (error) {
       if (error instanceof Error) {
         const authError = createAuthErrorMessage(error);
@@ -91,13 +181,6 @@ export class GitHubClient {
 
   public async resolveComment(prInfo: PRInfo, commentId: number): Promise<void> {
     try {
-      // First, get the pull request review comment to get its node_id
-      const { data: comment } = await this.octokit.rest.pulls.getReviewComment({
-        owner: prInfo.owner,
-        repo: prInfo.repo,
-        comment_id: commentId,
-      });
-
       // Use GraphQL to find the review thread containing this comment
       const query = `
         query($owner: String!, $repo: String!, $number: Int!) {
@@ -109,6 +192,7 @@ export class GitHubClient {
                   comments(first: 100) {
                     nodes {
                       id
+                      databaseId
                     }
                   }
                 }
@@ -162,23 +246,19 @@ export class GitHubClient {
         const nodes = commentsObj.nodes;
         if (!Array.isArray(nodes)) continue;
 
-        // Extract comment IDs
-        const commentIds: string[] = [];
+        // Check if this thread contains our comment (using databaseId)
         for (const node of nodes) {
-          if (node && typeof node === "object" && "id" in node) {
+          if (node && typeof node === "object" && "databaseId" in node) {
             // eslint-disable-next-line no-type-assertion/no-type-assertion
             const nodeObj = node as Record<string, unknown>;
-            if (typeof nodeObj.id === "string") {
-              commentIds.push(nodeObj.id);
+            if (nodeObj.databaseId === commentId) {
+              threadId = threadIdValue;
+              break;
             }
           }
         }
 
-        // Check if this thread contains our comment
-        if (commentIds.includes(comment.node_id)) {
-          threadId = threadIdValue;
-          break;
-        }
+        if (threadId) break;
       }
 
       if (!threadId) {
@@ -214,10 +294,90 @@ export class GitHubClient {
 
   public async deleteComment(prInfo: PRInfo, commentId: number): Promise<void> {
     try {
-      await this.octokit.rest.pulls.deleteReviewComment({
+      // First, find the GraphQL node ID for the comment
+      const query = `
+        query($owner: String!, $repo: String!, $number: Int!) {
+          repository(owner: $owner, name: $repo) {
+            pullRequest(number: $number) {
+              reviewThreads(first: 100) {
+                nodes {
+                  comments(first: 100) {
+                    nodes {
+                      id
+                      databaseId
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      `;
+
+      const queryResult = await this.graphqlWithAuth(query, {
         owner: prInfo.owner,
         repo: prInfo.repo,
-        comment_id: commentId,
+        number: prInfo.pullNumber,
+      });
+
+      // Find the comment's GraphQL node ID
+      let nodeId: string | null = null;
+
+      if (queryResult && typeof queryResult === "object") {
+        const reviewThreadsNodes = getNestedValue(queryResult, [
+          "repository",
+          "pullRequest",
+          "reviewThreads",
+          "nodes",
+        ]);
+
+        if (Array.isArray(reviewThreadsNodes)) {
+          for (const thread of reviewThreadsNodes) {
+            if (!thread || typeof thread !== "object") continue;
+
+            // eslint-disable-next-line no-type-assertion/no-type-assertion
+            const threadObj = thread as Record<string, unknown>;
+            const comments = threadObj.comments;
+
+            if (!comments || typeof comments !== "object") continue;
+
+            // eslint-disable-next-line no-type-assertion/no-type-assertion
+            const commentsObj = comments as Record<string, unknown>;
+            const nodes = commentsObj.nodes;
+
+            if (!Array.isArray(nodes)) continue;
+
+            for (const node of nodes) {
+              if (node && typeof node === "object" && "databaseId" in node && "id" in node) {
+                // eslint-disable-next-line no-type-assertion/no-type-assertion
+                const nodeObj = node as Record<string, unknown>;
+                if (nodeObj.databaseId === commentId && typeof nodeObj.id === "string") {
+                  nodeId = nodeObj.id;
+                  break;
+                }
+              }
+            }
+
+            if (nodeId) break;
+          }
+        }
+      }
+
+      if (!nodeId) {
+        throw new Error(`Could not find GraphQL node ID for comment ${commentId}`);
+      }
+
+      // Use GraphQL mutation to delete the comment
+      const mutation = `
+        mutation($nodeId: ID!) {
+          deleteComment: deletePullRequestReviewComment(input: {id: $nodeId}) {
+            clientMutationId
+          }
+        }
+      `;
+
+      await this.graphqlWithAuth(mutation, {
+        nodeId,
       });
     } catch (error) {
       if (error instanceof Error) {

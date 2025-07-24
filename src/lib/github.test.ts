@@ -1,30 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock functions - declare before any vi.mock calls
-const mockListReviewComments = vi.fn();
-const mockGetReviewComment = vi.fn();
-const mockUpdateReviewComment = vi.fn();
-const mockDeleteReviewComment = vi.fn();
 const mockGraphql = vi.fn();
 
 import { graphql } from "@octokit/graphql";
 import { createAuthErrorMessage, getGithubToken } from "../utils/auth.js";
 import { GitHubClient } from "./github.js";
-
-// Mock Octokit with proper implementation
-vi.mock("@octokit/rest", () => ({
-  Octokit: vi.fn().mockImplementation((config) => ({
-    rest: {
-      pulls: {
-        listReviewComments: mockListReviewComments,
-        getReviewComment: mockGetReviewComment,
-        updateReviewComment: mockUpdateReviewComment,
-        deleteReviewComment: mockDeleteReviewComment,
-      },
-    },
-    auth: config?.auth,
-  })),
-}));
 
 // Mock GraphQL
 vi.mock("@octokit/graphql");
@@ -124,34 +105,49 @@ describe("GitHubClient", () => {
 
   describe("getReviewComments", () => {
     it("should handle successful API response", async () => {
-      const mockResponse = {
-        data: [
-          {
-            id: 1,
-            body: "Test comment",
-            path: "src/test.ts",
-            line: 42,
-            start_line: 40,
-            user: { login: "testuser" },
-            html_url: "https://github.com/test/repo/pull/1#discussion_r123",
-            position: 5,
-            original_position: 3,
-            diff_hunk: "@@ -40,5 +40,8 @@",
-            created_at: "2023-01-01T00:00:00Z",
-            updated_at: "2023-01-01T00:00:00Z",
+      const mockGraphQLResponse = {
+        repository: {
+          pullRequest: {
+            reviewThreads: {
+              nodes: [
+                {
+                  id: "THREAD_1",
+                  isResolved: false,
+                  comments: {
+                    nodes: [
+                      {
+                        id: "COMMENT_1",
+                        databaseId: 1,
+                        body: "Test comment",
+                        path: "src/test.ts",
+                        line: 42,
+                        startLine: 40,
+                        author: { login: "testuser" },
+                        url: "https://github.com/test/repo/pull/1#discussion_r123",
+                        position: 5,
+                        originalPosition: 3,
+                        diffHunk: "@@ -40,5 +40,8 @@",
+                        createdAt: "2023-01-01T00:00:00Z",
+                        updatedAt: "2023-01-01T00:00:00Z",
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
           },
-        ],
+        },
       };
 
-      mockListReviewComments.mockResolvedValueOnce(mockResponse);
+      mockGraphql.mockResolvedValueOnce(mockGraphQLResponse);
 
       const prInfo = { owner: "test", repo: "repo", pullNumber: 1 };
       const result = await client.getReviewComments(prInfo);
 
-      expect(mockListReviewComments).toHaveBeenCalledWith({
+      expect(mockGraphql).toHaveBeenCalledWith(expect.stringContaining("reviewThreads"), {
         owner: "test",
         repo: "repo",
-        pull_number: 1,
+        number: 1,
       });
 
       expect(result).toHaveLength(1);
@@ -168,30 +164,46 @@ describe("GitHubClient", () => {
         diffHunk: "@@ -40,5 +40,8 @@",
         createdAt: "2023-01-01T00:00:00Z",
         updatedAt: "2023-01-01T00:00:00Z",
+        isResolved: false,
       });
     });
 
     it("should handle null/undefined values in API response", async () => {
-      const mockResponse = {
-        data: [
-          {
-            id: 2,
-            body: "Another comment",
-            path: null,
-            line: null,
-            start_line: null,
-            user: null,
-            html_url: "https://github.com/test/repo/pull/1#discussion_r124",
-            position: null,
-            original_position: null,
-            diff_hunk: null,
-            created_at: "2023-01-01T01:00:00Z",
-            updated_at: "2023-01-01T01:00:00Z",
+      const mockGraphQLResponse = {
+        repository: {
+          pullRequest: {
+            reviewThreads: {
+              nodes: [
+                {
+                  id: "THREAD_2",
+                  isResolved: true,
+                  comments: {
+                    nodes: [
+                      {
+                        id: "COMMENT_2",
+                        databaseId: 2,
+                        body: "Another comment",
+                        path: null,
+                        line: null,
+                        startLine: null,
+                        author: null,
+                        url: "https://github.com/test/repo/pull/1#discussion_r124",
+                        position: null,
+                        originalPosition: null,
+                        diffHunk: null,
+                        createdAt: "2023-01-01T01:00:00Z",
+                        updatedAt: "2023-01-01T01:00:00Z",
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
           },
-        ],
+        },
       };
 
-      mockListReviewComments.mockResolvedValueOnce(mockResponse);
+      mockGraphql.mockResolvedValueOnce(mockGraphQLResponse);
 
       const prInfo = { owner: "test", repo: "repo", pullNumber: 1 };
       const result = await client.getReviewComments(prInfo);
@@ -209,6 +221,7 @@ describe("GitHubClient", () => {
         diffHunk: undefined,
         createdAt: "2023-01-01T01:00:00Z",
         updatedAt: "2023-01-01T01:00:00Z",
+        isResolved: true,
       });
     });
 
@@ -217,7 +230,7 @@ describe("GitHubClient", () => {
       vi.mocked(createAuthErrorMessage).mockReturnValue(
         "GitHub authentication failed. Please ensure you have a valid token",
       );
-      mockListReviewComments.mockRejectedValueOnce(mockError);
+      mockGraphql.mockRejectedValueOnce(mockError);
 
       const prInfo = { owner: "test", repo: "repo", pullNumber: 1 };
 
@@ -228,7 +241,7 @@ describe("GitHubClient", () => {
 
     it("should throw error with Error instance", async () => {
       const mockError = new Error("API Error");
-      mockListReviewComments.mockRejectedValueOnce(mockError);
+      mockGraphql.mockRejectedValueOnce(mockError);
 
       const prInfo = { owner: "test", repo: "repo", pullNumber: 1 };
 
@@ -238,7 +251,7 @@ describe("GitHubClient", () => {
     });
 
     it("should throw generic error with non-Error instance", async () => {
-      mockListReviewComments.mockRejectedValueOnce("String error");
+      mockGraphql.mockRejectedValueOnce("String error");
 
       const prInfo = { owner: "test", repo: "repo", pullNumber: 1 };
 
@@ -248,10 +261,6 @@ describe("GitHubClient", () => {
 
   describe("resolveComment", () => {
     it("should resolve comment successfully", async () => {
-      mockGetReviewComment.mockResolvedValueOnce({
-        data: { node_id: "TEST_COMMENT_NODE_ID_123" },
-      });
-
       // Mock the query to find review threads
       mockGraphql.mockResolvedValueOnce({
         repository: {
@@ -261,7 +270,7 @@ describe("GitHubClient", () => {
                 {
                   id: "TEST_THREAD_ID_456",
                   comments: {
-                    nodes: [{ id: "TEST_COMMENT_NODE_ID_123" }],
+                    nodes: [{ id: "TEST_COMMENT_NODE_ID_123", databaseId: 123 }],
                   },
                 },
               ],
@@ -283,12 +292,6 @@ describe("GitHubClient", () => {
       const prInfo = { owner: "test", repo: "repo", pullNumber: 1 };
       await client.resolveComment(prInfo, 123);
 
-      expect(mockGetReviewComment).toHaveBeenCalledWith({
-        owner: "test",
-        repo: "repo",
-        comment_id: 123,
-      });
-
       expect(mockGraphql).toHaveBeenCalledTimes(2);
       expect(mockGraphql).toHaveBeenNthCalledWith(1, expect.stringContaining("query"), {
         owner: "test",
@@ -306,9 +309,6 @@ describe("GitHubClient", () => {
 
     it("should throw error with Error instance", async () => {
       const mockError = new Error("Not found");
-      mockGetReviewComment.mockResolvedValueOnce({
-        data: { node_id: "TEST_COMMENT_NODE_ID_123" },
-      });
       mockGraphql.mockRejectedValueOnce(mockError);
 
       const prInfo = { owner: "test", repo: "repo", pullNumber: 1 };
@@ -319,9 +319,6 @@ describe("GitHubClient", () => {
     });
 
     it("should throw generic error with non-Error instance", async () => {
-      mockGetReviewComment.mockResolvedValueOnce({
-        data: { node_id: "TEST_COMMENT_NODE_ID_123" },
-      });
       mockGraphql.mockRejectedValueOnce("String error");
 
       const prInfo = { owner: "test", repo: "repo", pullNumber: 1 };
@@ -332,21 +329,51 @@ describe("GitHubClient", () => {
 
   describe("deleteComment", () => {
     it("should delete comment successfully", async () => {
-      mockDeleteReviewComment.mockResolvedValueOnce({});
+      // Mock the query to find review threads and comment node ID
+      mockGraphql.mockResolvedValueOnce({
+        repository: {
+          pullRequest: {
+            reviewThreads: {
+              nodes: [
+                {
+                  comments: {
+                    nodes: [
+                      {
+                        id: "TEST_COMMENT_NODE_456",
+                        databaseId: 456,
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        },
+      });
+
+      // Mock the delete mutation
+      mockGraphql.mockResolvedValueOnce({
+        deleteComment: {
+          clientMutationId: "test",
+        },
+      });
 
       const prInfo = { owner: "test", repo: "repo", pullNumber: 1 };
       await client.deleteComment(prInfo, 456);
 
-      expect(mockDeleteReviewComment).toHaveBeenCalledWith({
-        owner: "test",
-        repo: "repo",
-        comment_id: 456,
-      });
+      expect(mockGraphql).toHaveBeenCalledTimes(2);
+      expect(mockGraphql).toHaveBeenNthCalledWith(
+        2,
+        expect.stringContaining("deletePullRequestReviewComment"),
+        {
+          nodeId: "TEST_COMMENT_NODE_456",
+        },
+      );
     });
 
     it("should throw error with Error instance", async () => {
       const mockError = new Error("Permission denied");
-      mockDeleteReviewComment.mockRejectedValueOnce(mockError);
+      mockGraphql.mockRejectedValueOnce(mockError);
 
       const prInfo = { owner: "test", repo: "repo", pullNumber: 1 };
 
@@ -356,7 +383,7 @@ describe("GitHubClient", () => {
     });
 
     it("should throw generic error with non-Error instance", async () => {
-      mockDeleteReviewComment.mockRejectedValueOnce("String error");
+      mockGraphql.mockRejectedValueOnce("String error");
 
       const prInfo = { owner: "test", repo: "repo", pullNumber: 1 };
 

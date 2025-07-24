@@ -6,6 +6,7 @@ export function filterCommentsByMention(
 ): FilteredComment[] {
   return comments
     .filter((comment) => comment.body.includes(mention))
+    .filter((comment) => !comment.isResolved) // Exclude resolved comments
     .map((comment) => ({
       id: comment.id,
       body: comment.body,
@@ -19,6 +20,7 @@ export function filterCommentsByMention(
       diffHunk: comment.diffHunk,
       createdAt: comment.createdAt,
       updatedAt: comment.updatedAt,
+      isResolved: comment.isResolved || false,
     }));
 }
 

@@ -13,6 +13,7 @@ export interface PRComment {
   diffHunk?: string | undefined;
   createdAt: string;
   updatedAt: string;
+  isResolved?: boolean;
 }
 
 export interface FilteredComment {
@@ -28,6 +29,7 @@ export interface FilteredComment {
   diffHunk?: string | undefined;
   createdAt: string;
   updatedAt: string;
+  isResolved?: boolean;
 }
 
 export interface PRInfo {
