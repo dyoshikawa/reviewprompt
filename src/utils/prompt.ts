@@ -11,7 +11,7 @@ export function buildPrompt(comments: FilteredComment[]): string {
     content: formatCommentForPrompt(comment),
   }));
 
-  return sections.map((section) => section.content).join("\n# =====\n");
+  return sections.map((section) => section.content).join("\n=====\n");
 }
 
 export function displayPrompt(prompt: string): void {

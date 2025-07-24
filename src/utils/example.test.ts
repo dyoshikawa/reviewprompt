@@ -23,7 +23,7 @@ describe("buildPrompt", () => {
     ];
 
     const result = buildPrompt(comments);
-    expect(result).toBe("# Fix this bug");
+    expect(result).toBe("Fix this bug");
   });
 
   it("should build prompt for multiple comments with separator", () => {
@@ -51,7 +51,7 @@ describe("buildPrompt", () => {
     ];
 
     const result = buildPrompt(comments);
-    expect(result).toBe("# Fix this bug\n# =====\n# Add tests");
+    expect(result).toBe("Fix this bug\n=====\nAdd tests");
   });
 
   it("should handle comments with path and line info", () => {
@@ -71,7 +71,7 @@ describe("buildPrompt", () => {
     ];
 
     const result = buildPrompt(comments);
-    expect(result).toBe("# ./src/test.ts:L42\n# Fix this bug");
+    expect(result).toBe("./src/test.ts:L42\nFix this bug");
   });
 });
 
