@@ -14,7 +14,8 @@ program
 
 program
   .argument("<pr-url>", "GitHub PR URL")
-  .option("-i, --interactive", "run in interactive mode")
+  .option("-a, --all", "process all comments without interactive mode")
+  .option("-i, --interactive", "run in interactive mode (default)")
   .option("-r, --resolve", "resolve comments after building prompt")
   .option("-d, --delete", "delete comments after building prompt")
   .option("-m, --mention <mention>", "custom mention to filter (default: [ai])", "[ai]")

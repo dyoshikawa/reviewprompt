@@ -21,7 +21,7 @@ export async function executeMainCommand(prUrl: string, options: CliOptions): Pr
 
     let selectedComments = filteredComments;
 
-    if (options.interactive) {
+    if (!options.all) {
       selectedComments = await showCommentSelector(
         filteredComments,
         `Select comments with "${mention}" to include in prompt:`,
