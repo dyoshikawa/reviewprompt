@@ -307,6 +307,51 @@ describe("GitHubClient", () => {
       );
     });
 
+    it("should throw error when GraphQL response structure is invalid", async () => {
+      // Mock invalid response structure (non-array nodes)
+      mockGraphql.mockResolvedValueOnce({
+        repository: {
+          pullRequest: {
+            reviewThreads: {
+              nodes: "invalid", // This should be an array
+            },
+          },
+        },
+      });
+
+      const prInfo = { owner: "test", repo: "repo", pullNumber: 1 };
+
+      await expect(client.resolveComment(prInfo, 123)).rejects.toThrow(
+        "Invalid GraphQL response structure",
+      );
+    });
+
+    it("should throw error when comment not found", async () => {
+      // Mock response with no matching comment
+      mockGraphql.mockResolvedValueOnce({
+        repository: {
+          pullRequest: {
+            reviewThreads: {
+              nodes: [
+                {
+                  id: "TEST_THREAD_ID_456",
+                  comments: {
+                    nodes: [{ id: "TEST_COMMENT_NODE_ID_999", databaseId: 999 }], // Different ID
+                  },
+                },
+              ],
+            },
+          },
+        },
+      });
+
+      const prInfo = { owner: "test", repo: "repo", pullNumber: 1 };
+
+      await expect(client.resolveComment(prInfo, 123)).rejects.toThrow(
+        "Could not find review thread for comment 123",
+      );
+    });
+
     it("should throw error with Error instance", async () => {
       const mockError = new Error("Not found");
       mockGraphql.mockRejectedValueOnce(mockError);
@@ -368,6 +413,36 @@ describe("GitHubClient", () => {
         {
           nodeId: "TEST_COMMENT_NODE_456",
         },
+      );
+    });
+
+    it("should throw error when comment not found for deletion", async () => {
+      // Mock response with no matching comment
+      mockGraphql.mockResolvedValueOnce({
+        repository: {
+          pullRequest: {
+            reviewThreads: {
+              nodes: [
+                {
+                  comments: {
+                    nodes: [
+                      {
+                        id: "TEST_COMMENT_NODE_999",
+                        databaseId: 999, // Different ID
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        },
+      });
+
+      const prInfo = { owner: "test", repo: "repo", pullNumber: 1 };
+
+      await expect(client.deleteComment(prInfo, 456)).rejects.toThrow(
+        "Could not find GraphQL node ID for comment 456",
       );
     });
 
