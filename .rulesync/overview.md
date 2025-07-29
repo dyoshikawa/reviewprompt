@@ -12,9 +12,9 @@ ReviewPrompt is a GitHub PR review comment aggregation CLI tool that extracts AI
 ## Project Overview
 
 **Name**: reviewprompt  
-**Version**: 0.1.0  
+**Version**: 0.12.0  
 **License**: MIT  
-**Purpose**: Unified AI rules management CLI tool that generates configuration files for various AI development tools
+**Purpose**: GitHub PR review comment aggregation CLI tool that extracts AI-targeted review comments and converts them into structured prompts for AI coding assistants
 
 ## Architecture
 
@@ -37,6 +37,7 @@ ReviewPrompt is a GitHub PR review comment aggregation CLI tool that extracts AI
 #### Utilities (`src/utils/`)
 - **clipboard.ts**: Clipboard operations for copying generated prompts
 - **prompt.ts**: Prompt generation and formatting utilities
+- **auth.ts**: Authentication utilities for GitHub token management
 
 ### Key Features
 
@@ -52,7 +53,7 @@ ReviewPrompt is a GitHub PR review comment aggregation CLI tool that extracts AI
 - **Language**: TypeScript
 - **CLI Framework**: Commander.js
 - **UI Framework**: React + ink (for TUI components)
-- **GitHub API**: Octokit REST
+- **GitHub API**: Octokit GraphQL and REST
 - **Build Tool**: tsup
 - **Package Manager**: pnpm
 - **Testing**: Vitest
@@ -71,10 +72,11 @@ ReviewPrompt is a GitHub PR review comment aggregation CLI tool that extracts AI
 
 ### Configuration
 
-- Uses environment variable `GITHUB_TOKEN` for API authentication
-- Supports custom mention filtering (default: `[ai]`)
-- Multiple output modes: console, clipboard
-- Interactive and batch processing modes
+- **Authentication**: Supports both GitHub Personal Access Token (`GITHUB_TOKEN` env var) and GitHub CLI authentication
+- **Mention Filtering**: Configurable mention patterns (default: `[ai]`)
+- **Output Modes**: Console display or direct clipboard copy
+- **Processing Modes**: Interactive selection (default) or batch processing with `--all` flag
+- **Comment Actions**: View, resolve, or delete comments after processing
 
 ### Entry Points
 
