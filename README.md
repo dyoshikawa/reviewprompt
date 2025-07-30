@@ -2,6 +2,29 @@
 
 A CLI tool that converts GitHub PR review comments into structured AI prompts, making it easier to address feedback using AI assistants.
 
+## Getting Started
+
+### 1. Create review comments with `[ai]` mention in your GitHub PR
+
+Example:
+
+```
+[ai] This function needs error handling for edge cases.
+```
+
+### 2. Run ReviewPrompt
+
+```bash
+# Generate prompt from selected comments with interactive mode
+npx reviewprompt https://github.com/owner/repo/pull/123 --clipboard
+
+# Generate prompt from all comments
+npx reviewprompt https://github.com/owner/repo/pull/123 --clipboard --all
+
+# Resolve comments after generating prompt
+npx reviewprompt https://github.com/owner/repo/pull/123 --clipboard --resolve
+```
+
 ## Features
 
 - 🔍 **Comment Filtering**: Filter PR comments by custom mentions (default: `[ai]`)
@@ -37,16 +60,7 @@ yarn global add reviewprompt
 
 ReviewPrompt requires GitHub authentication to access PR comments. Set up authentication using one of these methods:
 
-#### Personal Access Token (Recommended)
-
-1. Create a [GitHub Personal Access Token](https://github.com/settings/tokens) with `repo` scope
-2. Set the environment variable:
-
-```bash
-export GITHUB_TOKEN=your_token_here
-```
-
-#### GitHub CLI
+#### GitHub CLI（Recommended）
 
 If you have [GitHub CLI](https://cli.github.com/) installed and authenticated:
 
@@ -55,6 +69,15 @@ gh auth login
 ```
 
 ReviewPrompt will automatically use your GitHub CLI credentials.
+
+#### Personal Access Token
+
+1. Create a [GitHub Personal Access Token](https://github.com/settings/tokens) with `repo` scope
+2. Set the environment variable:
+
+```bash
+export GITHUB_TOKEN=your_token_here
+```
 
 ## Usage
 
