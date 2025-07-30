@@ -1,4 +1,5 @@
 import { showCommentSelector } from "../../components/CommentSelector.js";
+import { showLoadingIndicator } from "../../components/LoadingIndicator.js";
 import { filterCommentsByMention } from "../../lib/comment.js";
 import { GitHubClient } from "../../lib/github.js";
 import type { CliOptions, PRInfo } from "../../lib/types.js";
@@ -43,15 +44,39 @@ export async function executeMainCommand(prUrl: string, options: CliOptions): Pr
     }
 
     if (options.resolve) {
-      for (const comment of selectedComments) {
-        await client.resolveComment(prInfo, comment.id);
+      const loader = showLoadingIndicator("Resolving comments", selectedComments.length);
+
+      try {
+        for (let i = 0; i < selectedComments.length; i++) {
+          const comment = selectedComments[i];
+          if (comment) {
+            loader.update(i + 1);
+            await client.resolveComment(prInfo, comment.id);
+          }
+        }
+        loader.stop();
+        console.log(`Resolved ${selectedComments.length} comment(s).`);
+      } catch (error) {
+        loader.stop();
+        throw error;
       }
-      console.log(`Resolved ${selectedComments.length} comment(s).`);
     } else if (options.delete) {
-      for (const comment of selectedComments) {
-        await client.deleteComment(prInfo, comment.id);
+      const loader = showLoadingIndicator("Deleting comments", selectedComments.length);
+
+      try {
+        for (let i = 0; i < selectedComments.length; i++) {
+          const comment = selectedComments[i];
+          if (comment) {
+            loader.update(i + 1);
+            await client.deleteComment(prInfo, comment.id);
+          }
+        }
+        loader.stop();
+        console.log(`Deleted ${selectedComments.length} comment(s).`);
+      } catch (error) {
+        loader.stop();
+        throw error;
       }
-      console.log(`Deleted ${selectedComments.length} comment(s).`);
     }
   } catch (error) {
     console.error("Error:", error instanceof Error ? error.message : String(error));
