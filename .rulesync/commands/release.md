@@ -27,5 +27,5 @@ Let's resume the release process.
 7. Since `package.json` will be modified, execute `git commit` and `git push`.
 8. Run `gh pr create` and `gh pr merge --admin` to merge the release branch into the main branch.
 9. As a precaution, verify that `getVersion()` in `src/cli/index.ts` is updated to the ${new_version}.
-10. Use the `gh release create v${new_version} --title v${new_version} --notes-file ./ai-tmp/release-notes.md ...` command to create a Release on the `github.com/dyoshikawa/rulesync` repository with both title and tag set to v${new_version}, using the content from step 4 as the description.
+10. Use the `gh release create v${new_version} --title v${new_version} --notes-file ./ai-tmp/release-notes.md ...` command to create a Release on the `github.com/dyoshikawa/reviewprompt` repository with both title and tag set to v${new_version}, using the content from step 4 as the description.
 11. Clean up the branches. Run `git checkout main`, `git branch -D release/v${new_version}` and `git pull --prune`.
