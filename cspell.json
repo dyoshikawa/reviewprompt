@@ -160,6 +160,26 @@
         "testuser",
         "testowner",
         "testrepo",
-        "tlsv"
+        "tlsv",
+        "cicheck",
+        "OPENROUTER",
+        "ZHIPU",
+        "bubblewrap",
+        "socat",
+        "blesh",
+        "zstyle",
+        "pinact",
+        "shunsuke",
+        "opencode",
+        "oneline",
+        "deepwiki",
+        "omnisharp",
+        "rego",
+        "solargraph",
+        "pdfplumber",
+        "OOXML",
+        "mnda",
+        "arcname",
+        "zipf"
     ]
 }

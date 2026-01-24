@@ -2,9 +2,10 @@
   "name": "Claude Code Sandbox",
   "build": {
     "dockerfile": "Dockerfile",
+    "context": "..",
     "args": {
-      "TZ": "${localEnv:TZ:America/Los_Angeles}"
-    }
+      "TZ": "${localEnv:TZ:America/Los_Angeles}",
+    },
   },
   "runArgs": ["--cap-add=NET_ADMIN", "--cap-add=NET_RAW"],
   "customizations": {
@@ -13,39 +14,46 @@
         "oxc.oxc-vscode",
         "dbaeumer.vscode-eslint",
         "eamodio.gitlens",
-        "biomejs.biome"
       ],
       "settings": {
         "editor.formatOnSave": true,
-        "editor.defaultFormatter": "biomejs.biome",
+        "editor.defaultFormatter": "oxc.oxc-vscode",
         "editor.codeActionsOnSave": {
-          "source.fixAll.eslint": "explicit"
+          "source.fixAll.eslint": "explicit",
         },
+        "oxc.enable": true,
+        "oxc.fmt.experimental": true,
         "terminal.integrated.defaultProfile.linux": "zsh",
         "terminal.integrated.profiles.linux": {
           "bash": {
             "path": "bash",
-            "icon": "terminal-bash"
+            "icon": "terminal-bash",
           },
           "zsh": {
-            "path": "zsh"
-          }
-        }
-      }
-    }
+            "path": "zsh",
+          },
+        },
+      },
+    },
   },
   "remoteUser": "node",
   "mounts": [
-    "source=claude-code-bashhistory-${devcontainerId},target=/commandhistory,type=volume",
-    "source=claude-code-config-${devcontainerId},target=/home/node/.claude,type=volume"
+    "source=${localWorkspaceFolderBasename}-claude-code-bashhistory,target=/commandhistory,type=volume,consistency=delegated",
+    "source=${localWorkspaceFolderBasename}-claude-code-config,target=/home/node/.claude,type=volume,consistency=delegated",
+    "source=${localWorkspaceFolderBasename}-node_modules,target=${containerWorkspaceFolder}/node_modules,type=volume,consistency=delegated",
+    "source=${localWorkspaceFolderBasename}-pnpm-store,target=${containerWorkspaceFolder}/.pnpm-store,type=volume,consistency=delegated",
   ],
   "remoteEnv": {
     "NODE_OPTIONS": "--max-old-space-size=4096",
     "CLAUDE_CONFIG_DIR": "/home/node/.claude",
     "POWERLEVEL9K_DISABLE_GITSTATUS": "true",
-    "OPENAI_API_KEY": "${localEnv:OPENAI_API_KEY}",
-    "GITHUB_TOKEN": "${localEnv:DEVCONTAINER_GITHUB_TOKEN}"
+    "GITHUB_TOKEN": "${localEnv:DEVCONTAINER_GITHUB_TOKEN}",
+    "OPENAI_API_KEY": "${localEnv:DEVCONTAINER_OPENAI_API_KEY}",
+    "GEMINI_API_KEY": "${localEnv:DEVCONTAINER_GEMINI_API_KEY}",
+    "OPENROUTER_API_KEY": "${localEnv:DEVCONTAINER_OPENROUTER_API_KEY}",
+    "ZHIPU_API_KEY": "${localEnv:DEVCONTAINER_ZAI_API_KEY}",
   },
   "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=delegated",
-  "workspaceFolder": "/workspace"
+  "workspaceFolder": "/workspace",
+  "postCreateCommand": "init.sh",
 }
