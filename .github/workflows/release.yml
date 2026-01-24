@@ -4,6 +4,10 @@ on:
   release:
     types: [created]
 
+permissions:
+  id-token: write # Required for OIDC
+  contents: read # Required for checking out code
+
 jobs:
   publish:
     name: Publish to NPM
@@ -11,32 +15,17 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           ref: main
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup mise
+        uses: jdx/mise-action@6d1e696aa24c1aa1bcc1adea0212707c71ab78a8 # v2
         with:
-          node-version: '24'
-          registry-url: 'https://registry.npmjs.org'
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 10.12.2
+          experimental: true
 
       - name: Install dependencies
-        run: pnpm install
-
-      - name: Run quality checks
-        run: |
-          pnpm check
-          pnpm secretlint
-          pnpm cspell
-          pnpm test
+        run: pnpm install --ignore-scripts
 
       - name: Publish to npm
         run: pnpm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

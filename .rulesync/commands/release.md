@@ -1,6 +1,9 @@
 ---
-description: Release a new version of the project.
+description: "Release a new version of the project."
+targets:
+  - "*"
 ---
+
 First, let's work on the following steps.
 
 1. Confirm that you are currently on the main branch. If not on main branch, abort this operation.
