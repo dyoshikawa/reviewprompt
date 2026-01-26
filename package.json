@@ -49,6 +49,7 @@
         "sort": "sort-package-json",
         "test": "vitest run --silent",
         "test:coverage": "vitest run --coverage --silent",
+        "test:e2e": "vitest run --config vitest.e2e.config.ts --silent=false",
         "test:watch": "vitest --silent",
         "typecheck": "tsgo --noEmit",
         "prepare": "simple-git-hooks && pnpm dlx rulesync@latest generate"
