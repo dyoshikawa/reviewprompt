@@ -1,4 +1,5 @@
 {
+  "$schema": "https://github.com/dyoshikawa/rulesync/releases/latest/download/mcp-schema.json",
   "mcpServers": {
     "serena": {
       "type": "stdio",
@@ -18,14 +19,14 @@
       "env": {}
     },
     "deepwiki": {
-      "type": "sse",
-      "url": "https://mcp.deepwiki.com/sse",
+      "type": "http",
+      "url": "https://mcp.deepwiki.com/mcp",
       "env": {}
     },
     "rulesync": {
       "type": "stdio",
       "command": "pnpm",
-      "args": ["dev", "mcp"],
+      "args": ["dlx", "rulesync", "mcp"],
       "env": {}
     }
   }

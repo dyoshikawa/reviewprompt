@@ -21,14 +21,15 @@
     },
     "deepwiki": {
       "type": "remote",
-      "url": "https://mcp.deepwiki.com/sse",
+      "url": "https://mcp.deepwiki.com/mcp",
       "enabled": true
     },
     "rulesync": {
       "type": "local",
       "command": [
         "pnpm",
-        "dev",
+        "dlx",
+        "rulesync",
         "mcp"
       ],
       "enabled": true,
