@@ -192,6 +192,7 @@
     "shellcheck",
     "trivyignores",
     "worktree",
-    "worktrees"
+    "worktrees",
+    "pipefail"
   ]
 }
