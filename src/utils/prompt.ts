@@ -1,6 +1,5 @@
-import type { FilteredComment, PromptSection } from "../lib/types.js";
-
 import { formatCommentForPrompt } from "../lib/comment.js";
+import type { FilteredComment, PromptSection } from "../lib/types.js";
 
 export function buildPrompt(comments: FilteredComment[]): string {
   if (comments.length === 0) {

@@ -1,8 +1,7 @@
 import { graphql } from "@octokit/graphql";
 
-import type { PRComment, PRInfo } from "./types.js";
-
 import { createAuthErrorMessage, getGithubToken } from "../utils/auth.js";
+import type { PRComment, PRInfo } from "./types.js";
 
 // Helper function to safely access nested properties
 const getNestedValue = (obj: unknown, path: string[]): unknown => {
@@ -167,11 +166,11 @@ export class GitHubClient {
       if (error instanceof Error) {
         const authError = createAuthErrorMessage(error);
         if (authError !== `GitHub API error: ${error.message}`) {
-          throw new Error(authError);
+          throw new Error(authError, { cause: error });
         }
-        throw new Error(`Failed to fetch PR comments: ${error.message}`);
+        throw new Error(`Failed to fetch PR comments: ${error.message}`, { cause: error });
       }
-      throw new Error("Failed to fetch PR comments");
+      throw new Error("Failed to fetch PR comments", { cause: error });
     }
   }
 
@@ -277,11 +276,11 @@ export class GitHubClient {
       if (error instanceof Error) {
         const authError = createAuthErrorMessage(error);
         if (authError !== `GitHub API error: ${error.message}`) {
-          throw new Error(authError);
+          throw new Error(authError, { cause: error });
         }
-        throw new Error(`Failed to resolve comment: ${error.message}`);
+        throw new Error(`Failed to resolve comment: ${error.message}`, { cause: error });
       }
-      throw new Error("Failed to resolve comment");
+      throw new Error("Failed to resolve comment", { cause: error });
     }
   }
 
@@ -373,11 +372,11 @@ export class GitHubClient {
       if (error instanceof Error) {
         const authError = createAuthErrorMessage(error);
         if (authError !== `GitHub API error: ${error.message}`) {
-          throw new Error(authError);
+          throw new Error(authError, { cause: error });
         }
-        throw new Error(`Failed to delete comment: ${error.message}`);
+        throw new Error(`Failed to delete comment: ${error.message}`, { cause: error });
       }
-      throw new Error("Failed to delete comment");
+      throw new Error("Failed to delete comment", { cause: error });
     }
   }
 }

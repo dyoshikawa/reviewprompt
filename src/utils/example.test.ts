@@ -1,7 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
 import type { FilteredComment } from "../lib/types.js";
-
 import { buildPrompt, displayPrompt } from "./prompt.js";
 
 describe("buildPrompt", () => {
