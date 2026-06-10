@@ -13,7 +13,7 @@
       "mcp": false,
       "subagents": true,
       "skills": true,
-      "hooks": true
+      "hooks": false
     },
     "claudecode": {
       "rules": true,
@@ -21,7 +21,7 @@
       "mcp": true,
       "subagents": true,
       "skills": true,
-      "hooks": true
+      "hooks": false
     },
     "opencode": {
       "rules": true,
@@ -29,7 +29,7 @@
       "mcp": true,
       "subagents": true,
       "skills": true,
-      "hooks": true
+      "hooks": false
     },
     "takt": {
       "rules": true,
