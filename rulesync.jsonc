@@ -1,25 +1,57 @@
 {
-  "targets": [
-    "copilot",
-    "claudecode",
-    "opencode"
-  ],
-  "features": [
-    "rules",
-    "ignore",
-    "mcp",
-    "commands",
-    "subagents",
-    "skills"
-  ],
-  "baseDirs": [
-    "."
-  ],
+  "$schema": "https://github.com/dyoshikawa/rulesync/releases/latest/download/config-schema.json",
+
+  // Per-target features using the new object form on `targets`.
+  // See docs/guide/configuration.md for details.
+  "targets": {
+    "copilot": {
+      "rules": {
+        "ruleDiscoveryMode": "explicit",
+        "includeLocalRoot": false
+      },
+      "commands": true,
+      "mcp": false,
+      "subagents": true,
+      "skills": true,
+      "hooks": true
+    },
+    "claudecode": {
+      "rules": true,
+      "commands": true,
+      "mcp": true,
+      "subagents": true,
+      "skills": true,
+      "hooks": true
+    },
+    "opencode": {
+      "rules": true,
+      "commands": true,
+      "mcp": true,
+      "subagents": true,
+      "skills": true,
+      "hooks": true
+    },
+    "takt": {
+      "rules": true,
+      "commands": true,
+      "subagents": true,
+      "skills": true
+    }
+  },
+
+  // Output root directory or directories for generation.
+  "outputRoots": ["."],
+
+  // Delete existing files before generating
   "delete": true,
-  "verbose": false,
-  "global": false,
-  "simulateCommands": false,
-  "simulateSubagents": false,
-  "simulateSkills": false,
-  "modularMcp": false
+  "verbose": true,
+  "silent": false,
+
+  "simulateCommands": true,
+  "simulateSubagents": true,
+  "simulateSkills": true,
+
+  // When true (default), `rulesync gitignore` only emits entries for the
+  // tools listed in `targets`.
+  "gitignoreTargetsOnly": false
 }

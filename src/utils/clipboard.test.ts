@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
 import { copyToClipboard } from "./clipboard.js";
 
 // Mock clipboardy module

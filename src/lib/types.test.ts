@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import type { CliOptions, FilteredComment, PRComment, PRInfo, PromptSection } from "./types.js";
 
 describe("Type definitions", () => {

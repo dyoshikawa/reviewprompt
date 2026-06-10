@@ -88,6 +88,7 @@ reviewprompt https://github.com/owner/repo/pull/123
 ```
 
 This will:
+
 1. Fetch all review comments from the PR
 2. Filter comments containing `[ai]` mention
 3. Display the generated prompt
@@ -136,9 +137,10 @@ reviewprompt <pr-url> [options]
 ```
 
 **Options:**
+
 - `-i, --interactive` - Run in interactive mode to select specific comments
 - `-r, --resolve` - Resolve comments after building prompt
-- `-d, --delete` - Delete comments after building prompt  
+- `-d, --delete` - Delete comments after building prompt
 - `-m, --mention <mention>` - Custom mention to filter (default: `[ai]`)
 - `-c, --clipboard` - Copy output to clipboard
 
@@ -151,6 +153,7 @@ reviewprompt resolve <pr-url> [options]
 ```
 
 **Options:**
+
 - `-a, --all` - Resolve all comments without interactive mode
 - `-m, --mention <mention>` - Custom mention to filter (default: `[ai]`)
 
@@ -163,6 +166,7 @@ reviewprompt delete <pr-url> [options]
 ```
 
 **Options:**
+
 - `-a, --all` - Delete all comments without interactive mode
 - `-m, --mention <mention>` - Custom mention to filter (default: `[ai]`)
 
@@ -171,11 +175,13 @@ reviewprompt delete <pr-url> [options]
 ### Basic Workflow
 
 1. **Add mention to PR comments**: When reviewing code, add `[ai]` to comments you want AI assistance with:
+
    ```
    [ai] This function needs error handling for edge cases
    ```
 
 2. **Generate prompt**: Run reviewprompt to collect and format these comments:
+
    ```bash
    reviewprompt https://github.com/myorg/myproject/pull/456 --clipboard
    ```
@@ -195,7 +201,7 @@ Use different mentions for different team members or purposes:
 # For senior dev review
 reviewprompt https://github.com/myorg/myproject/pull/456 --mention "[senior]"
 
-# For security review  
+# For security review
 reviewprompt https://github.com/myorg/myproject/pull/456 --mention "[security]"
 
 # For performance optimization
@@ -210,7 +216,7 @@ ReviewPrompt generates structured prompts with file context:
 ./src/utils/auth.ts:L15
 Add input validation for the email parameter
 
-./src/components/UserProfile.tsx:L45-L50  
+./src/components/UserProfile.tsx:L45-L50
 This component should handle loading states better
 
 ./src/api/users.ts:L23

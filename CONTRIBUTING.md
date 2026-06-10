@@ -13,12 +13,14 @@ Thank you for your interest in contributing to ReviewPrompt! This guide will hel
 ### Installation
 
 1. **Clone the repository**:
+
    ```bash
    git clone https://github.com/dyoshikawa/reviewprompt.git
    cd reviewprompt
    ```
 
 2. **Install dependencies**:
+
    ```bash
    pnpm install
    ```
@@ -31,13 +33,14 @@ Thank you for your interest in contributing to ReviewPrompt! This guide will hel
 ### Environment Configuration
 
 1. **GitHub Authentication**: Set up a GitHub token for testing:
+
    ```bash
    export GITHUB_TOKEN=your_development_token_here
    ```
 
 2. **Development Tools**: The project includes several development tools configured via:
-   - `biome.json` - Code formatting and linting
-   - `eslint.config.js` - ESLint configuration
+   - `.oxlintrc.json` - oxlint (linting) configuration
+   - `.oxfmtrc.json` - oxfmt (formatting) configuration
    - `tsconfig.json` - TypeScript configuration
    - `vitest.config.ts` - Test configuration
 
@@ -54,14 +57,17 @@ pnpm test:watch         # Run tests in watch mode
 pnpm test:coverage      # Run tests with coverage report
 
 # Code Quality
-pnpm check              # Run all linting and type checking
-pnpm fix                # Auto-fix linting issues
+pnpm cicheck            # Run all quality checks (code + content)
+pnpm cicheck:code       # Format check, lint, type check, and tests
+pnpm cicheck:content    # Spell check and secret scan
+pnpm check              # Format check, lint, and type check
+pnpm fix                # Auto-fix formatting and lint issues
 pnpm typecheck          # TypeScript type checking
 
-# Individual linters
-pnpm bcheck             # Biome check
-pnpm eslint             # ESLint
-pnpm oxlint             # Oxlint
+# Individual tools
+pnpm fmt                # Format with oxfmt
+pnpm fmt:check          # Check formatting with oxfmt
+pnpm oxlint             # Lint with oxlint
 pnpm cspell             # Spell checking
 pnpm secretlint         # Secret scanning
 ```
@@ -99,9 +105,8 @@ pnpm vitest src/lib/comment.test.ts
 
 We maintain high code quality standards using multiple tools:
 
-- **Biome**: Primary formatter and linter
-- **ESLint**: Additional JavaScript/TypeScript linting
-- **Oxlint**: Fast linting for common issues
+- **oxfmt**: Code formatter
+- **oxlint**: Fast linter for common issues
 - **TypeScript**: Strict type checking
 - **CSpell**: Spell checking in code and comments
 - **Secretlint**: Prevents committing secrets
@@ -109,7 +114,7 @@ We maintain high code quality standards using multiple tools:
 All quality checks must pass before merging:
 
 ```bash
-pnpm check  # Runs all quality checks
+pnpm cicheck  # Runs all quality checks
 ```
 
 ## Project Structure
@@ -142,6 +147,7 @@ src/
 ### Submitting Changes
 
 1. **Fork the repository** and create a feature branch:
+
    ```bash
    git checkout -b feature/your-feature-name
    ```
@@ -152,12 +158,13 @@ src/
    - Update documentation if needed
 
 3. **Test your changes**:
+
    ```bash
-   pnpm check    # Run all quality checks
-   pnpm test     # Run tests
+   pnpm cicheck    # Run all quality checks (lint, types, tests, spelling, secrets)
    ```
 
 4. **Commit your changes**:
+
    ```bash
    git add .
    git commit -m "feat: add your feature description"
@@ -183,7 +190,7 @@ We follow [Conventional Commits](https://www.conventionalcommits.org/):
 ### Code Style Guidelines
 
 1. **TypeScript**: Use strict typing, avoid `any` when possible
-2. **Formatting**: Automatic via Biome (runs on pre-commit)
+2. **Formatting**: Automatic via oxfmt (runs on pre-commit)
 3. **Naming**: Use descriptive names for functions and variables
 4. **Comments**: Add JSDoc comments for public APIs
 5. **Imports**: Use relative imports within the project

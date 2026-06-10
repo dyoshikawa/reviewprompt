@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { cleanCommentBody, filterCommentsByMention, formatCommentForPrompt } from "./comment.js";
+
 import type { FilteredComment, PRComment } from "./types.js";
+
+import { cleanCommentBody, filterCommentsByMention, formatCommentForPrompt } from "./comment.js";
 
 describe("filterCommentsByMention", () => {
   const mockComments: PRComment[] = [

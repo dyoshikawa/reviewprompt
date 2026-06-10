@@ -1,6 +1,6 @@
 ---
 root: true
-targets: ['*']
+targets: ["*"]
 description: "reviewprompt project overview and architecture guide"
 globs: ["**/*"]
 ---
@@ -21,20 +21,24 @@ ReviewPrompt is a GitHub PR review comment aggregation CLI tool that extracts AI
 ### Core Components
 
 #### CLI Layer (`src/cli/`)
+
 - **index.ts**: Main CLI entry point using Commander.js with three primary commands
 - **commands/main.ts**: Primary command for extracting and building prompts from PR comments
 - **commands/resolve.ts**: Command for marking comments as resolved
 - **commands/delete.ts**: Command for deleting comments
 
 #### GitHub Integration (`src/lib/`)
+
 - **github.ts**: GitHubClient class handling Octokit REST API interactions
 - **comment.ts**: Comment filtering and processing logic
 - **types.ts**: TypeScript type definitions for PR comments, CLI options, and data structures
 
 #### UI Components (`src/components/`)
+
 - **CommentSelector.tsx**: React component for interactive comment selection using ink
 
 #### Utilities (`src/utils/`)
+
 - **clipboard.ts**: Clipboard operations for copying generated prompts
 - **prompt.ts**: Prompt generation and formatting utilities
 - **auth.ts**: Authentication utilities for GitHub token management
@@ -57,7 +61,15 @@ ReviewPrompt is a GitHub PR review comment aggregation CLI tool that extracts AI
 - **Build Tool**: tsup
 - **Package Manager**: pnpm
 - **Testing**: Vitest
-- **Linting**: Biome, ESLint, oxlint
+- **Linting**: oxlint
+- **Formatting**: oxfmt
+
+### Development Commands
+
+- `pnpm cicheck:code` checks code style, type safety, and tests.
+- `pnpm cicheck:content` checks spelling and secrets.
+- `pnpm cicheck` runs both. Run it before every `git commit`.
+- `pnpm fix` auto-fixes formatting (oxfmt) and lint (oxlint) issues.
 
 ### Data Flow
 

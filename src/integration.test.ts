@@ -1,7 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+import type { CliOptions, FilteredComment, PRComment } from "./lib/types.js";
+
 import { filterCommentsByMention } from "./lib/comment.js";
 import { GitHubClient } from "./lib/github.js";
-import type { CliOptions, FilteredComment, PRComment } from "./lib/types.js";
 import { buildPrompt, displayPrompt } from "./utils/prompt.js";
 
 // Integration tests that exercise multiple components together
