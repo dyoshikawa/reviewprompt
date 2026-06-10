@@ -1,6 +1,7 @@
 import { Box, render, Text, useInput } from "ink";
 import SelectInput from "ink-select-input";
 import React, { useState } from "react";
+
 import type { FilteredComment } from "../lib/types.js";
 
 type JSXElement = React.ReactElement;

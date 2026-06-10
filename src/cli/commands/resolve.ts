@@ -1,7 +1,8 @@
+import type { CliOptions } from "../../lib/types.js";
+
 import { showCommentSelector } from "../../components/CommentSelector.js";
 import { filterCommentsByMention } from "../../lib/comment.js";
 import { GitHubClient } from "../../lib/github.js";
-import type { CliOptions } from "../../lib/types.js";
 
 export async function executeResolveCommand(prUrl: string, options: CliOptions): Promise<void> {
   try {

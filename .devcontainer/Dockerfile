@@ -1,4 +1,4 @@
-FROM node:24
+FROM node:26
 
 ARG TZ
 ENV TZ="$TZ"
@@ -119,9 +119,8 @@ RUN curl -fsSL https://github.com/AikidoSec/safe-chain/releases/latest/download/
 
 # Install global packages
 ENV PNPM_HOME=/home/node/.pnpm
-ENV PATH=$PATH:$PNPM_HOME
+ENV PATH=$PNPM_HOME/bin:$PATH
 RUN mkdir -p "$PNPM_HOME" && \
-    mise exec -- pnpm setup && \
     mise exec -- pnpm add -g \
     @openai/codex \
     @google/gemini-cli
@@ -132,6 +131,13 @@ RUN curl -fsSL https://claude.ai/install.sh | bash
 # Install OpenCode
 RUN curl -fsSL https://opencode.ai/install | bash
 RUN echo 'PATH=/home/node/.opencode/bin:$PATH' >> "/home/node/.bashrc"
+
+# Install git-gtr
+RUN mkdir -p /home/node/.local/bin /home/node/.local/src && \
+    git clone https://github.com/coderabbitai/git-worktree-runner /home/node/.local/src/git-worktree-runner && \
+    ln -s /home/node/.local/src/git-worktree-runner/bin/git-gtr /home/node/.local/bin/git-gtr && \
+    echo 'export PATH="$HOME/.local/bin:$PATH"' >> "/home/node/.bashrc" && \
+    echo 'export PATH="$HOME/.local/bin:$PATH"' >> "/home/node/.zshrc"
 
 # Aliases
 ENV CLAUDE_COMMAND="alias claude=\"claude --dangerously-skip-permissions\""

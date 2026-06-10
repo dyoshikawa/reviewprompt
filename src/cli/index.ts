@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { Command } from "commander";
+
 import { executeDeleteCommand } from "./commands/delete.js";
 import { executeMainCommand } from "./commands/main.js";
 import { executeResolveCommand } from "./commands/resolve.js";

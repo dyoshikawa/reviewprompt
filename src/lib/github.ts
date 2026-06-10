@@ -1,6 +1,8 @@
 import { graphql } from "@octokit/graphql";
-import { createAuthErrorMessage, getGithubToken } from "../utils/auth.js";
+
 import type { PRComment, PRInfo } from "./types.js";
+
+import { createAuthErrorMessage, getGithubToken } from "../utils/auth.js";
 
 // Helper function to safely access nested properties
 const getNestedValue = (obj: unknown, path: string[]): unknown => {
@@ -9,7 +11,6 @@ const getNestedValue = (obj: unknown, path: string[]): unknown => {
     if (!current || typeof current !== "object" || !(key in current)) {
       return undefined;
     }
-    // eslint-disable-next-line no-type-assertion/no-type-assertion
     const currentRecord = current as Record<string, unknown>;
     current = currentRecord[key];
   }
@@ -104,14 +105,12 @@ export class GitHubClient {
           for (const thread of reviewThreadsNodes) {
             if (!thread || typeof thread !== "object") continue;
 
-            // eslint-disable-next-line no-type-assertion/no-type-assertion
             const threadObj = thread as Record<string, unknown>;
             const isResolved = threadObj.isResolved === true;
             const threadComments = threadObj.comments;
 
             if (!threadComments || typeof threadComments !== "object") continue;
 
-            // eslint-disable-next-line no-type-assertion/no-type-assertion
             const commentsObj = threadComments as Record<string, unknown>;
             const nodes = commentsObj.nodes;
 
@@ -119,7 +118,6 @@ export class GitHubClient {
 
             for (const node of nodes) {
               if (node && typeof node === "object") {
-                // eslint-disable-next-line no-type-assertion/no-type-assertion
                 const commentNode = node as Record<string, unknown>;
 
                 if (
@@ -138,10 +136,8 @@ export class GitHubClient {
                         commentNode.author &&
                         typeof commentNode.author === "object" &&
                         "login" in commentNode.author &&
-                        // eslint-disable-next-line no-type-assertion/no-type-assertion
                         typeof (commentNode.author as Record<string, unknown>).login === "string"
-                          ? // eslint-disable-next-line no-type-assertion/no-type-assertion
-                            ((commentNode.author as Record<string, unknown>).login as string)
+                          ? ((commentNode.author as Record<string, unknown>).login as string)
                           : "unknown",
                     },
                     htmlUrl: typeof commentNode.url === "string" ? commentNode.url : "",
@@ -230,7 +226,6 @@ export class GitHubClient {
       for (const thread of reviewThreadsNodes) {
         if (!thread || typeof thread !== "object") continue;
 
-        // eslint-disable-next-line no-type-assertion/no-type-assertion
         const threadObj = thread as Record<string, unknown>;
 
         // Get thread id
@@ -241,7 +236,6 @@ export class GitHubClient {
         const comments = threadObj.comments;
         if (!comments || typeof comments !== "object") continue;
 
-        // eslint-disable-next-line no-type-assertion/no-type-assertion
         const commentsObj = comments as Record<string, unknown>;
         const nodes = commentsObj.nodes;
         if (!Array.isArray(nodes)) continue;
@@ -249,7 +243,6 @@ export class GitHubClient {
         // Check if this thread contains our comment (using databaseId)
         for (const node of nodes) {
           if (node && typeof node === "object" && "databaseId" in node) {
-            // eslint-disable-next-line no-type-assertion/no-type-assertion
             const nodeObj = node as Record<string, unknown>;
             if (nodeObj.databaseId === commentId) {
               threadId = threadIdValue;
@@ -335,13 +328,11 @@ export class GitHubClient {
           for (const thread of reviewThreadsNodes) {
             if (!thread || typeof thread !== "object") continue;
 
-            // eslint-disable-next-line no-type-assertion/no-type-assertion
             const threadObj = thread as Record<string, unknown>;
             const comments = threadObj.comments;
 
             if (!comments || typeof comments !== "object") continue;
 
-            // eslint-disable-next-line no-type-assertion/no-type-assertion
             const commentsObj = comments as Record<string, unknown>;
             const nodes = commentsObj.nodes;
 
@@ -349,7 +340,6 @@ export class GitHubClient {
 
             for (const node of nodes) {
               if (node && typeof node === "object" && "databaseId" in node && "id" in node) {
-                // eslint-disable-next-line no-type-assertion/no-type-assertion
                 const nodeObj = node as Record<string, unknown>;
                 if (nodeObj.databaseId === commentId && typeof nodeObj.id === "string") {
                   nodeId = nodeObj.id;

@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mockGraphql = vi.fn();
 
 import { graphql } from "@octokit/graphql";
+
 import { createAuthErrorMessage, getGithubToken } from "../utils/auth.js";
 import { GitHubClient } from "./github.js";
 

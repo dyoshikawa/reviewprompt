@@ -1,0 +1,4 @@
+# Ignore sudo usage in the devcontainer Dockerfile.
+# The devcontainer runs as the non-root "node" user, so passwordless sudo is
+# intentionally required for local development tooling.
+AVD-DS-0010

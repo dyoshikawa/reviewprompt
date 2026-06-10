@@ -1,8 +1,9 @@
+import type { CliOptions, PRInfo } from "../../lib/types.js";
+
 import { showCommentSelector } from "../../components/CommentSelector.js";
 import { showLoadingIndicator } from "../../components/LoadingIndicator.js";
 import { filterCommentsByMention } from "../../lib/comment.js";
 import { GitHubClient } from "../../lib/github.js";
-import type { CliOptions, PRInfo } from "../../lib/types.js";
 import { copyToClipboard } from "../../utils/clipboard.js";
 import { buildPrompt, displayPrompt } from "../../utils/prompt.js";
 
