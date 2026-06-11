@@ -1,6 +1,6 @@
 {
     "name": "reviewprompt",
-    "version": "0.13.0",
+    "version": "0.13.1",
     "description": "Unified AI rules management CLI tool that generates configuration files for various AI development tools",
     "keywords": [
         "ai",
@@ -75,7 +75,6 @@
     "devDependencies": {
         "@openrouter/sdk": "0.9.11",
         "@secretlint/secretlint-rule-preset-recommend": "13.0.2",
-        "oxfmt": "0.54.0",
         "@toon-format/toon": "2.1.0",
         "@tsconfig/node24": "24.0.4",
         "@types/js-yaml": "4.0.9",
@@ -86,6 +85,7 @@
         "cspell": "10.0.1",
         "lint-staged": "17.0.7",
         "o3-search-mcp": "0.0.9",
+        "oxfmt": "0.54.0",
         "oxlint": "1.69.0",
         "repomix": "1.12.0",
         "resend": "6.9.4",
