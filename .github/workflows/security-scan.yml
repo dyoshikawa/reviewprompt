@@ -1,0 +1,40 @@
+name: Security Scan
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  security-scan:
+    name: Security Scan with OpenRouter
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - name: Setup mise
+        uses: jdx/mise-action@dba19683ed58901619b14f395a24841710cb4925 # v2
+        with:
+          experimental: true
+
+      - name: Install dependencies
+        run: pnpm install --ignore-scripts
+
+      - name: Generate toon files
+        run: pnpm exec tsx scripts/generate-repomix-toon.ts
+
+      - name: Run security scan
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          SECURITY_SCAN_MODEL: ${{ secrets.SECURITY_SCAN_MODEL }}
+          SECURITY_SCAN_PROMPT: ${{ secrets.SECURITY_SCAN_PROMPT }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          RESEND_FROM_EMAIL: ${{ secrets.RESEND_FROM_EMAIL }}
+          SECURITY_SCAN_RECIPIENT: ${{ secrets.SECURITY_SCAN_RECIPIENT }}
+        run: pnpm exec tsx scripts/security-scan-toon.ts

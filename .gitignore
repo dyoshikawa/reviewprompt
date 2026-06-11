@@ -185,6 +185,9 @@ pnpm-lock.yaml
 # Test temporary directories
 test-*
 
+# Security scan generated files (repomix-output*.json / *.toon)
+repomix-output*
+
 .claude/settings.local.json
 
 .pnpm-store

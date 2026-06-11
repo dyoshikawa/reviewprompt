@@ -73,8 +73,10 @@
         "zod": "4.4.3"
     },
     "devDependencies": {
+        "@openrouter/sdk": "0.9.11",
         "@secretlint/secretlint-rule-preset-recommend": "13.0.2",
         "oxfmt": "0.54.0",
+        "@toon-format/toon": "2.1.0",
         "@tsconfig/node24": "24.0.4",
         "@types/js-yaml": "4.0.9",
         "@types/micromatch": "4.0.10",
@@ -85,6 +87,8 @@
         "lint-staged": "17.0.7",
         "o3-search-mcp": "0.0.9",
         "oxlint": "1.69.0",
+        "repomix": "1.12.0",
+        "resend": "6.9.4",
         "secretlint": "13.0.2",
         "simple-git-hooks": "2.13.1",
         "sort-package-json": "4.0.0",

@@ -200,6 +200,11 @@
     "trivyignores",
     "worktree",
     "worktrees",
-    "pipefail"
+    "pipefail",
+    "repomix",
+    "toon",
+    "resend",
+    "openrouter",
+    "Referer"
   ]
 }

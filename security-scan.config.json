@@ -1,0 +1,12 @@
+{
+  "variants": [
+    {
+      "name": "repomix-output-src",
+      "include": ["src/**/*.ts", "src/**/*.tsx"]
+    },
+    {
+      "name": "repomix-output-configs",
+      "ignore": ["src/**/*", "repomix-output*"]
+    }
+  ]
+}
