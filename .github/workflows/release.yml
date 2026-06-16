@@ -27,5 +27,13 @@ jobs:
       - name: Install dependencies
         run: pnpm install --ignore-scripts
 
+      - name: Build
+        run: pnpm build
+
+      - name: Verify built binary (e2e)
+        run: pnpm test:e2e
+        env:
+          REVIEWPROMPT_CMD: node dist/index.js
+
       - name: Publish to npm
-        run: pnpm publish
+        run: pnpm publish --no-git-checks
