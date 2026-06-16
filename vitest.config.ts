@@ -10,6 +10,7 @@ export default defineConfig({
       include: ["src/**/*.ts"],
       exclude: [
         "src/**/*.test.ts",
+        "src/e2e/**",
         "src/cli/index.ts",
         "src/lib/types.ts",
         "src/components/**/*.tsx",
