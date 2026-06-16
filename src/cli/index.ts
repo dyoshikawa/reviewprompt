@@ -11,7 +11,7 @@ const program = new Command();
 program
   .name("reviewprompt")
   .description("GitHub PR review comments to AI prompt CLI tool")
-  .version("0.13.1");
+  .version("0.13.2");
 
 program
   .argument("<pr-url>", "GitHub PR URL")
