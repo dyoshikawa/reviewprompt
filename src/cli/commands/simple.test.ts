@@ -19,11 +19,18 @@ describe("CLI Commands Basic Structure", () => {
     vi.clearAllMocks();
   });
 
-  it("should be able to import main command function", () => {
+  it("should be able to import main command function", async () => {
     // Just test that the imports work without executing the functions
-    expect(typeof import("./main.js")).toBe("object");
-    expect(typeof import("./resolve.js")).toBe("object");
-    expect(typeof import("./delete.js")).toBe("object");
+    // Await them so module loading cannot outlive the test environment
+    const modules = await Promise.all([
+      import("./main.js"),
+      import("./resolve.js"),
+      import("./delete.js"),
+    ]);
+
+    for (const module of modules) {
+      expect(typeof module).toBe("object");
+    }
   });
 
   it("should have CLI command functions available", () => {
