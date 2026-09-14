@@ -12,6 +12,10 @@ updates:
       all-dependencies:
         patterns:
           - "*"
+    ignore:
+      # typescript 7 breaks `tsup --dts` (rollup-plugin-dts); tracked in #45
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
     commit-message:
       prefix: "chore"
       prefix-development: "chore"
