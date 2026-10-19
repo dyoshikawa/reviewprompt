@@ -1,22 +1,27 @@
 import { showCommentSelector } from "../../components/CommentSelector.js";
 import { showLoadingIndicator } from "../../components/LoadingIndicator.js";
-import { filterCommentsByMention } from "../../lib/comment.js";
+import { DEFAULT_MENTION } from "../../lib/comment.js";
 import { GitHubClient } from "../../lib/github.js";
 import type { CliOptions, PRInfo } from "../../lib/types.js";
 import { copyToClipboard } from "../../utils/clipboard.js";
 import { buildPrompt, displayPrompt } from "../../utils/prompt.js";
+import { collectMentionedComments, noCommentsMessage } from "./collect-comments.js";
 
 export async function executeMainCommand(prUrl: string, options: CliOptions): Promise<void> {
   try {
     const client = new GitHubClient();
     const prInfo: PRInfo = client.parsePRUrl(prUrl);
 
-    const comments = await client.getReviewComments(prInfo);
-    const mention = options.mention || "[ai]";
-    const filteredComments = filterCommentsByMention(comments, mention);
+    const mention = options.mention || DEFAULT_MENTION;
+    const { comments: filteredComments, skippedCount } = await collectMentionedComments(
+      client,
+      prInfo,
+      mention,
+      options,
+    );
 
     if (filteredComments.length === 0) {
-      console.log(`No comments found with mention "${mention}"`);
+      console.log(noCommentsMessage(mention, skippedCount));
       return;
     }
 
@@ -26,6 +31,7 @@ export async function executeMainCommand(prUrl: string, options: CliOptions): Pr
       selectedComments = await showCommentSelector(
         filteredComments,
         `Select comments with "${mention}" to include in prompt:`,
+        mention,
       );
 
       if (selectedComments.length === 0) {
@@ -34,7 +40,7 @@ export async function executeMainCommand(prUrl: string, options: CliOptions): Pr
       }
     }
 
-    const prompt = buildPrompt(selectedComments);
+    const prompt = buildPrompt(selectedComments, mention);
 
     if (options.clipboard) {
       await copyToClipboard(prompt);

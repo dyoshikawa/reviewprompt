@@ -1,19 +1,24 @@
 import { showCommentSelector } from "../../components/CommentSelector.js";
-import { filterCommentsByMention } from "../../lib/comment.js";
+import { DEFAULT_MENTION } from "../../lib/comment.js";
 import { GitHubClient } from "../../lib/github.js";
 import type { CliOptions } from "../../lib/types.js";
+import { collectMentionedComments, noCommentsMessage } from "./collect-comments.js";
 
 export async function executeDeleteCommand(prUrl: string, options: CliOptions): Promise<void> {
   try {
     const client = new GitHubClient();
     const prInfo = client.parsePRUrl(prUrl);
 
-    const comments = await client.getReviewComments(prInfo);
-    const mention = options.mention || "[ai]";
-    const filteredComments = filterCommentsByMention(comments, mention);
+    const mention = options.mention || DEFAULT_MENTION;
+    const { comments: filteredComments, skippedCount } = await collectMentionedComments(
+      client,
+      prInfo,
+      mention,
+      options,
+    );
 
     if (filteredComments.length === 0) {
-      console.log(`No comments found with mention "${mention}"`);
+      console.log(noCommentsMessage(mention, skippedCount));
       return;
     }
 
@@ -23,6 +28,7 @@ export async function executeDeleteCommand(prUrl: string, options: CliOptions): 
       selectedComments = await showCommentSelector(
         filteredComments,
         `Select comments with "${mention}" to delete:`,
+        mention,
       );
 
       if (selectedComments.length === 0) {

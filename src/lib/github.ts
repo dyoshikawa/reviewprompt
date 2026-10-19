@@ -47,6 +47,17 @@ export class GitHubClient {
     };
   }
 
+  public async getViewerLogin(): Promise<string | undefined> {
+    try {
+      const result = await this.graphqlWithAuth(`query { viewer { login } }`);
+      const login = getNestedValue(result, ["viewer", "login"]);
+      return typeof login === "string" ? login : undefined;
+    } catch {
+      // The viewer login only widens the trusted set; fall back to authorAssociation alone.
+      return undefined;
+    }
+  }
+
   public async getReviewComments(prInfo: PRInfo): Promise<PRComment[]> {
     try {
       // Use GraphQL API to get all review comments with resolve status
@@ -69,6 +80,7 @@ export class GitHubClient {
                       author {
                         login
                       }
+                      authorAssociation
                       url
                       position
                       originalPosition
@@ -139,6 +151,10 @@ export class GitHubClient {
                           ? ((commentNode.author as Record<string, unknown>).login as string)
                           : "unknown",
                     },
+                    authorAssociation:
+                      typeof commentNode.authorAssociation === "string"
+                        ? commentNode.authorAssociation
+                        : undefined,
                     htmlUrl: typeof commentNode.url === "string" ? commentNode.url : "",
                     position:
                       typeof commentNode.position === "number" ? commentNode.position : null,

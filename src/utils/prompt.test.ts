@@ -110,3 +110,19 @@ describe("prompt utilities", () => {
     });
   });
 });
+
+describe("buildPrompt with a custom mention", () => {
+  it("strips the given mention from every section", () => {
+    const comment: FilteredComment = {
+      id: 1,
+      body: "@bot rename this",
+      user: "a",
+      htmlUrl: "",
+      position: null,
+      originalPosition: null,
+      createdAt: "",
+      updatedAt: "",
+    };
+    expect(buildPrompt([comment], "@bot")).toBe("rename this");
+  });
+});

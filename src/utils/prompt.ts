@@ -1,14 +1,17 @@
-import { formatCommentForPrompt } from "../lib/comment.js";
+import { DEFAULT_MENTION, formatCommentForPrompt } from "../lib/comment.js";
 import type { FilteredComment, PromptSection } from "../lib/types.js";
 
-export function buildPrompt(comments: FilteredComment[]): string {
+export function buildPrompt(
+  comments: FilteredComment[],
+  mention: string = DEFAULT_MENTION,
+): string {
   if (comments.length === 0) {
     return "";
   }
 
   const sections: PromptSection[] = comments.map((comment) => ({
     comment,
-    content: formatCommentForPrompt(comment),
+    content: formatCommentForPrompt(comment, mention),
   }));
 
   return sections.map((section) => section.content).join("\n=====\n");

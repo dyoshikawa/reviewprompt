@@ -7,6 +7,7 @@ export interface PRComment {
   user: {
     login: string;
   };
+  authorAssociation?: string | undefined;
   htmlUrl: string;
   position: number | null;
   originalPosition: number | null;
@@ -23,6 +24,7 @@ export interface FilteredComment {
   line?: number | undefined;
   startLine?: number | undefined;
   user: string;
+  authorAssociation?: string | undefined;
   htmlUrl: string;
   position: number | null;
   originalPosition: number | null;
@@ -45,6 +47,7 @@ export interface CliOptions {
   mention?: string;
   clipboard?: boolean;
   all?: boolean;
+  includeUntrustedAuthors?: boolean;
 }
 
 export interface PromptSection {
