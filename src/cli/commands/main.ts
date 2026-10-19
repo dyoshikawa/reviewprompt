@@ -1,5 +1,6 @@
 import { showCommentSelector } from "../../components/CommentSelector.js";
 import { showLoadingIndicator } from "../../components/LoadingIndicator.js";
+import { DEFAULT_MENTION } from "../../lib/comment.js";
 import { GitHubClient } from "../../lib/github.js";
 import type { CliOptions, PRInfo } from "../../lib/types.js";
 import { copyToClipboard } from "../../utils/clipboard.js";
@@ -11,7 +12,7 @@ export async function executeMainCommand(prUrl: string, options: CliOptions): Pr
     const client = new GitHubClient();
     const prInfo: PRInfo = client.parsePRUrl(prUrl);
 
-    const mention = options.mention || "[ai]";
+    const mention = options.mention || DEFAULT_MENTION;
     const { comments: filteredComments, skippedCount } = await collectMentionedComments(
       client,
       prInfo,
@@ -39,7 +40,7 @@ export async function executeMainCommand(prUrl: string, options: CliOptions): Pr
       }
     }
 
-    const prompt = buildPrompt(selectedComments);
+    const prompt = buildPrompt(selectedComments, mention);
 
     if (options.clipboard) {
       await copyToClipboard(prompt);

@@ -2,7 +2,7 @@ import { Box, render, Text, useInput } from "ink";
 import SelectInput from "ink-select-input";
 import React, { useState } from "react";
 
-import { cleanCommentBody, sanitizeSingleLine } from "../lib/comment.js";
+import { cleanCommentBody, DEFAULT_MENTION, sanitizeSingleLine } from "../lib/comment.js";
 import type { FilteredComment } from "../lib/types.js";
 
 type JSXElement = React.ReactElement;
@@ -81,10 +81,10 @@ export function CommentSelector({
   );
 }
 
-function formatCommentLabel(
+export function formatCommentLabel(
   comment: FilteredComment,
   isSelected: boolean,
-  mention: string = "[ai]",
+  mention: string = DEFAULT_MENTION,
 ): string {
   const prefix = isSelected ? "☑️ " : "☐ ";
   const path = comment.path ? sanitizeSingleLine(comment.path) : "General";

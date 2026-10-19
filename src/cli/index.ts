@@ -2,6 +2,7 @@
 
 import { Command } from "commander";
 
+import { DEFAULT_MENTION } from "../lib/comment.js";
 import {
   INCLUDE_UNTRUSTED_AUTHORS_DESCRIPTION,
   INCLUDE_UNTRUSTED_AUTHORS_FLAG,
@@ -23,7 +24,7 @@ program
   .option("-i, --interactive", "run in interactive mode (default)")
   .option("-r, --resolve", "resolve comments after building prompt")
   .option("-d, --delete", "delete comments after building prompt")
-  .option("-m, --mention <mention>", "custom mention to filter (default: [ai])", "[ai]")
+  .option("-m, --mention <mention>", "custom mention to filter", DEFAULT_MENTION)
   .option(INCLUDE_UNTRUSTED_AUTHORS_FLAG, INCLUDE_UNTRUSTED_AUTHORS_DESCRIPTION)
   .option("-c, --clipboard", "copy output to clipboard")
   .action(async (prUrl: string, options) => {
@@ -35,7 +36,7 @@ program
   .description("resolve comments containing the specified mention")
   .argument("<pr-url>", "GitHub PR URL")
   .option("-a, --all", "resolve all comments without interactive mode")
-  .option("-m, --mention <mention>", "custom mention to filter (default: [ai])", "[ai]")
+  .option("-m, --mention <mention>", "custom mention to filter", DEFAULT_MENTION)
   .option(INCLUDE_UNTRUSTED_AUTHORS_FLAG, INCLUDE_UNTRUSTED_AUTHORS_DESCRIPTION)
   .action(async (prUrl: string, options) => {
     await executeResolveCommand(prUrl, options);
@@ -46,7 +47,7 @@ program
   .description("delete comments containing the specified mention")
   .argument("<pr-url>", "GitHub PR URL")
   .option("-a, --all", "delete all comments without interactive mode")
-  .option("-m, --mention <mention>", "custom mention to filter (default: [ai])", "[ai]")
+  .option("-m, --mention <mention>", "custom mention to filter", DEFAULT_MENTION)
   .option(INCLUDE_UNTRUSTED_AUTHORS_FLAG, INCLUDE_UNTRUSTED_AUTHORS_DESCRIPTION)
   .action(async (prUrl: string, options) => {
     await executeDeleteCommand(prUrl, options);

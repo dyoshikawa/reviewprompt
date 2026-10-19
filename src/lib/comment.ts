@@ -1,8 +1,10 @@
 import type { FilteredComment, PRComment } from "./types.js";
 
+export const DEFAULT_MENTION = "[ai]";
+
 export function filterCommentsByMention(
   comments: PRComment[],
-  mention: string = "[ai]",
+  mention: string = DEFAULT_MENTION,
 ): FilteredComment[] {
   return comments
     .filter((comment) => comment.body.includes(mention))
@@ -61,13 +63,13 @@ export function partitionCommentsByTrust(
   return { trusted, untrusted };
 }
 
-// C0 controls except tab and newline, DEL, C1 controls, bidi marks/overrides/isolates,
-// zero-width characters, the BOM, and Unicode tag characters. These can rewrite terminal output
-// (ANSI escape sequences), reorder displayed text, or hide text from a human reader while an AI
-// model still reads it.
+// Control characters except tab and newline (Cc: C0, DEL, C1), format characters (Cf: bidi
+// marks/overrides/isolates, zero-width characters, the BOM, soft hyphen, Unicode tag characters,
+// ...), variation selectors, and invisible fillers. These can rewrite terminal output (ANSI escape
+// sequences), reorder displayed text, or hide text from a human reader while an AI model still
+// reads it (tag-character and variation-selector smuggling).
 const UNSAFE_CHARACTERS =
-  // oxlint-disable-next-line no-control-regex
-  /[\u0000-\u0008\u000B-\u001F\u007F-\u009F\u061C\u200B-\u200F\u202A-\u202E\u2060-\u2069\uFEFF]|[\u{E0000}-\u{E007F}]/gu;
+  /(?![\t\n])\p{Cc}|\p{Cf}|\u034F|[\u115F\u1160\u180B-\u180F\u3164\uFFA0]|[\uFE00-\uFE0F]|[\u{E0100}-\u{E01EF}]/gu;
 
 export function stripControlCharacters(text: string): string {
   return text.replace(/\r\n?|[\u2028\u2029]/g, "\n").replace(UNSAFE_CHARACTERS, "");
@@ -81,7 +83,7 @@ export function sanitizeSingleLine(text: string): string {
   return stripControlCharacters(text).replace(/[\n\t]+/g, " ");
 }
 
-export function cleanCommentBody(body: string, mention: string = "[ai]"): string {
+export function cleanCommentBody(body: string, mention: string = DEFAULT_MENTION): string {
   // Escape special regex characters in the mention string
   const escapedMention = mention.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   return stripControlCharacters(body)
@@ -91,8 +93,17 @@ export function cleanCommentBody(body: string, mention: string = "[ai]"): string
     .replace(/\n+\s*$/, "");
 }
 
-export function formatCommentForPrompt(comment: FilteredComment): string {
-  const cleanBody = cleanCommentBody(comment.body);
+// buildPrompt joins sections with a "=====" line; escape such lines in a body so one comment
+// cannot fake the start of another section.
+function escapeSectionSeparators(body: string): string {
+  return body.replace(/^(\s*={5,}\s*)$/gm, "\\$1");
+}
+
+export function formatCommentForPrompt(
+  comment: FilteredComment,
+  mention: string = DEFAULT_MENTION,
+): string {
+  const cleanBody = escapeSectionSeparators(cleanCommentBody(comment.body, mention));
 
   if (comment.path && (comment.line || comment.startLine)) {
     const lineInfo =

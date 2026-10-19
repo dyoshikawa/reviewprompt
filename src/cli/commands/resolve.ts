@@ -1,4 +1,5 @@
 import { showCommentSelector } from "../../components/CommentSelector.js";
+import { DEFAULT_MENTION } from "../../lib/comment.js";
 import { GitHubClient } from "../../lib/github.js";
 import type { CliOptions } from "../../lib/types.js";
 import { collectMentionedComments, noCommentsMessage } from "./collect-comments.js";
@@ -8,7 +9,7 @@ export async function executeResolveCommand(prUrl: string, options: CliOptions):
     const client = new GitHubClient();
     const prInfo = client.parsePRUrl(prUrl);
 
-    const mention = options.mention || "[ai]";
+    const mention = options.mention || DEFAULT_MENTION;
     const { comments: filteredComments, skippedCount } = await collectMentionedComments(
       client,
       prInfo,
