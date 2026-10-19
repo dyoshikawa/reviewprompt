@@ -67,9 +67,10 @@ export function partitionCommentsByTrust(
 // marks/overrides/isolates, zero-width characters, the BOM, soft hyphen, Unicode tag characters,
 // ...), variation selectors, and invisible fillers. These can rewrite terminal output (ANSI escape
 // sequences), reorder displayed text, or hide text from a human reader while an AI model still
-// reads it (tag-character and variation-selector smuggling).
+// reads it (tag-character and variation-selector smuggling). Private-use characters (Co) render
+// as nothing or as an arbitrary glyph, so they are dropped as well.
 const UNSAFE_CHARACTERS =
-  /(?![\t\n])\p{Cc}|\p{Cf}|\u034F|[\u115F\u1160\u180B-\u180F\u3164\uFFA0]|[\uFE00-\uFE0F]|[\u{E0100}-\u{E01EF}]/gu;
+  /(?![\t\n])\p{Cc}|\p{Cf}|\u034F|[\u115F\u1160\u180B-\u180F\u2800\u3164\uFFA0]|\p{Co}|[\uFE00-\uFE0F]|[\u{E0100}-\u{E01EF}]/gu;
 
 export function stripControlCharacters(text: string): string {
   return text.replace(/\r\n?|[\u2028\u2029]/g, "\n").replace(UNSAFE_CHARACTERS, "");
@@ -96,7 +97,9 @@ export function cleanCommentBody(body: string, mention: string = DEFAULT_MENTION
 // buildPrompt joins sections with a "=====" line; escape such lines in a body so one comment
 // cannot fake the start of another section.
 function escapeSectionSeparators(body: string): string {
-  return body.replace(/^(\s*={5,}\s*)$/gm, "\\$1");
+  // Horizontal whitespace only: `\s` would also match newlines and anchor on a blank line above.
+  // Fullwidth "＝" (U+FF1D) is included because a model may read it as the same separator.
+  return body.replace(/^([ \t]*[=\uFF1D]{5,}[ \t]*)$/gm, "\\$1");
 }
 
 export function formatCommentForPrompt(
