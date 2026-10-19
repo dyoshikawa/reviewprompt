@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import { cleanCommentBody, filterCommentsByMention, formatCommentForPrompt } from "./comment.js";
+import {
+  cleanCommentBody,
+  filterCommentsByMention,
+  formatCommentForPrompt,
+  isTrustedComment,
+  partitionCommentsByTrust,
+  stripControlCharacters,
+} from "./comment.js";
 import type { FilteredComment, PRComment } from "./types.js";
 
 describe("filterCommentsByMention", () => {
@@ -260,5 +267,106 @@ describe("formatCommentForPrompt", () => {
 
     const result = formatCommentForPrompt(comment);
     expect(result).toBe("Fix this bug");
+  });
+});
+
+function makeComment(
+  id: number,
+  user: string,
+  authorAssociation: string | undefined,
+): FilteredComment {
+  return {
+    id,
+    body: "[ai] do something",
+    user,
+    authorAssociation,
+    htmlUrl: "",
+    position: null,
+    originalPosition: null,
+    createdAt: "",
+    updatedAt: "",
+  };
+}
+
+describe("author trust", () => {
+  it("trusts owners, members and collaborators", () => {
+    expect(isTrustedComment(makeComment(1, "a", "OWNER"))).toBe(true);
+    expect(isTrustedComment(makeComment(2, "b", "MEMBER"))).toBe(true);
+    expect(isTrustedComment(makeComment(3, "c", "COLLABORATOR"))).toBe(true);
+  });
+
+  it("does not trust other associations or a missing association", () => {
+    expect(isTrustedComment(makeComment(1, "a", "CONTRIBUTOR"))).toBe(false);
+    expect(isTrustedComment(makeComment(2, "b", "FIRST_TIME_CONTRIBUTOR"))).toBe(false);
+    expect(isTrustedComment(makeComment(3, "c", "NONE"))).toBe(false);
+    expect(isTrustedComment(makeComment(4, "d", undefined))).toBe(false);
+  });
+
+  it("trusts the authenticated user regardless of association", () => {
+    expect(isTrustedComment(makeComment(1, "Me", "CONTRIBUTOR"), "me")).toBe(true);
+    expect(isTrustedComment(makeComment(2, "other", "NONE"), "me")).toBe(false);
+  });
+
+  it("partitions comments by trust", () => {
+    const { trusted, untrusted } = partitionCommentsByTrust(
+      [
+        makeComment(1, "owner", "OWNER"),
+        makeComment(2, "stranger", "NONE"),
+        makeComment(3, "me", "CONTRIBUTOR"),
+      ],
+      "me",
+    );
+    expect(trusted.map((c) => c.id)).toEqual([1, 3]);
+    expect(untrusted.map((c) => c.id)).toEqual([2]);
+  });
+
+  it("carries authorAssociation through filterCommentsByMention", () => {
+    const result = filterCommentsByMention([
+      {
+        id: 1,
+        body: "[ai] fix",
+        user: { login: "a" },
+        authorAssociation: "MEMBER",
+        htmlUrl: "",
+        position: null,
+        originalPosition: null,
+        createdAt: "",
+        updatedAt: "",
+      },
+    ]);
+    expect(result[0]?.authorAssociation).toBe("MEMBER");
+  });
+});
+
+describe("stripControlCharacters", () => {
+  it("removes the ESC byte of ANSI escape sequences and other C0/C1 controls", () => {
+    expect(stripControlCharacters("one\u001b[2J two\u0007 three\u009b four\u007f")).toBe(
+      "one[2J two three four",
+    );
+  });
+
+  it("keeps newlines and tabs and normalizes CRLF", () => {
+    expect(stripControlCharacters("a\tb\r\nc\rd\ne")).toBe("a\tb\nc\nd\ne");
+  });
+
+  it("removes bidi override and isolate characters", () => {
+    expect(stripControlCharacters("a\u202eb\u2066c\u2069d")).toBe("abcd");
+  });
+
+  it("is applied when cleaning and formatting comment bodies", () => {
+    expect(cleanCommentBody("[ai] \u001b]0;title\u0007 fix this")).toBe("]0;title fix this");
+    const formatted = formatCommentForPrompt({
+      id: 1,
+      body: "[ai] fix\u001b[31m",
+      path: "src/a\u001b.ts",
+      line: 1,
+      user: "a",
+      htmlUrl: "",
+      position: null,
+      originalPosition: null,
+      createdAt: "",
+      updatedAt: "",
+    });
+    expect(formatted).toBe("./src/a.ts:L1\nfix[31m");
   });
 });

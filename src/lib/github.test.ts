@@ -104,6 +104,18 @@ describe("GitHubClient", () => {
     });
   });
 
+  describe("getViewerLogin", () => {
+    it("should return the authenticated user's login", async () => {
+      mockGraphql.mockResolvedValueOnce({ viewer: { login: "me" } });
+      await expect(client.getViewerLogin()).resolves.toBe("me");
+    });
+
+    it("should return undefined when the query fails", async () => {
+      mockGraphql.mockRejectedValueOnce(new Error("boom"));
+      await expect(client.getViewerLogin()).resolves.toBeUndefined();
+    });
+  });
+
   describe("getReviewComments", () => {
     it("should handle successful API response", async () => {
       const mockGraphQLResponse = {
@@ -124,6 +136,7 @@ describe("GitHubClient", () => {
                         line: 42,
                         startLine: 40,
                         author: { login: "testuser" },
+                        authorAssociation: "COLLABORATOR",
                         url: "https://github.com/test/repo/pull/1#discussion_r123",
                         position: 5,
                         originalPosition: 3,
@@ -145,7 +158,7 @@ describe("GitHubClient", () => {
       const prInfo = { owner: "test", repo: "repo", pullNumber: 1 };
       const result = await client.getReviewComments(prInfo);
 
-      expect(mockGraphql).toHaveBeenCalledWith(expect.stringContaining("reviewThreads"), {
+      expect(mockGraphql).toHaveBeenCalledWith(expect.stringContaining("authorAssociation"), {
         owner: "test",
         repo: "repo",
         number: 1,
@@ -159,6 +172,7 @@ describe("GitHubClient", () => {
         line: 42,
         startLine: 40,
         user: { login: "testuser" },
+        authorAssociation: "COLLABORATOR",
         htmlUrl: "https://github.com/test/repo/pull/1#discussion_r123",
         position: 5,
         originalPosition: 3,

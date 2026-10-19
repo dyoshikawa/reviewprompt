@@ -91,7 +91,8 @@ This will:
 
 1. Fetch all review comments from the PR
 2. Filter comments containing `[ai]` mention
-3. Display the generated prompt
+3. Keep only comments written by trusted authors (see below)
+4. Display the generated prompt
 
 ### Interactive Mode
 
@@ -109,6 +110,18 @@ Use custom mention patterns:
 reviewprompt https://github.com/owner/repo/pull/123 --mention "[bot]"
 reviewprompt https://github.com/owner/repo/pull/123 --mention "@custom"
 ```
+
+### Trusted Authors
+
+On a public repository anyone can leave a review comment containing `[ai]`, so by default ReviewPrompt only uses comments whose author has write access to the repository (author association `OWNER`, `MEMBER` or `COLLABORATOR`) or is the authenticated user. Skipped comments are reported on stderr. The same filter applies to the `resolve` and `delete` commands and to `--resolve` / `--delete`.
+
+To include comments from other authors, pass `--include-untrusted-authors`:
+
+```bash
+reviewprompt https://github.com/owner/repo/pull/123 --include-untrusted-authors
+```
+
+Only do this when you have read those comments: their text becomes part of the prompt you hand to an AI agent.
 
 ### Copy to Clipboard
 
@@ -142,6 +155,7 @@ reviewprompt <pr-url> [options]
 - `-r, --resolve` - Resolve comments after building prompt
 - `-d, --delete` - Delete comments after building prompt
 - `-m, --mention <mention>` - Custom mention to filter (default: `[ai]`)
+- `--include-untrusted-authors` - Also include comments from authors without write access to the repository
 - `-c, --clipboard` - Copy output to clipboard
 
 ### Resolve Command
@@ -156,6 +170,7 @@ reviewprompt resolve <pr-url> [options]
 
 - `-a, --all` - Resolve all comments without interactive mode
 - `-m, --mention <mention>` - Custom mention to filter (default: `[ai]`)
+- `--include-untrusted-authors` - Also include comments from authors without write access to the repository
 
 ### Delete Command
 
@@ -169,6 +184,7 @@ reviewprompt delete <pr-url> [options]
 
 - `-a, --all` - Delete all comments without interactive mode
 - `-m, --mention <mention>` - Custom mention to filter (default: `[ai]`)
+- `--include-untrusted-authors` - Also include comments from authors without write access to the repository
 
 ## Examples
 

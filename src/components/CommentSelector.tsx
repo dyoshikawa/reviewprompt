@@ -2,6 +2,7 @@ import { Box, render, Text, useInput } from "ink";
 import SelectInput from "ink-select-input";
 import React, { useState } from "react";
 
+import { stripControlCharacters } from "../lib/comment.js";
 import type { FilteredComment } from "../lib/types.js";
 
 type JSXElement = React.ReactElement;
@@ -76,15 +77,18 @@ export function CommentSelector({ comments, onSelect, title }: CommentSelectorPr
 
 function formatCommentLabel(comment: FilteredComment, isSelected: boolean): string {
   const prefix = isSelected ? "☑️ " : "☐ ";
-  const path = comment.path ? `${comment.path}` : "General";
+  const path = comment.path ? stripControlCharacters(comment.path) : "General";
   const line = comment.line || comment.startLine ? `:L${comment.line || comment.startLine}` : "";
-  const preview = comment.body
+  const preview = stripControlCharacters(comment.body)
     .replace(/\[ai\]/g, "")
+    .replace(/\s+/g, " ")
     .trim()
     .substring(0, 50);
   const truncated = preview.length === 50 ? "..." : "";
 
-  return `${prefix}${path}${line} - ${preview}${truncated}`;
+  const author = `@${stripControlCharacters(comment.user)}`;
+
+  return `${prefix}${path}${line} ${author} - ${preview}${truncated}`;
 }
 
 export async function showCommentSelector(

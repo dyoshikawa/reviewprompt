@@ -1,16 +1,15 @@
 import { showCommentSelector } from "../../components/CommentSelector.js";
-import { filterCommentsByMention } from "../../lib/comment.js";
 import { GitHubClient } from "../../lib/github.js";
 import type { CliOptions } from "../../lib/types.js";
+import { collectMentionedComments } from "./collect-comments.js";
 
 export async function executeResolveCommand(prUrl: string, options: CliOptions): Promise<void> {
   try {
     const client = new GitHubClient();
     const prInfo = client.parsePRUrl(prUrl);
 
-    const comments = await client.getReviewComments(prInfo);
     const mention = options.mention || "[ai]";
-    const filteredComments = filterCommentsByMention(comments, mention);
+    const filteredComments = await collectMentionedComments(client, prInfo, mention, options);
 
     if (filteredComments.length === 0) {
       console.log(`No comments found with mention "${mention}"`);

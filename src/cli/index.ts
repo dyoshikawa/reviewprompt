@@ -20,6 +20,10 @@ program
   .option("-r, --resolve", "resolve comments after building prompt")
   .option("-d, --delete", "delete comments after building prompt")
   .option("-m, --mention <mention>", "custom mention to filter (default: [ai])", "[ai]")
+  .option(
+    "--include-untrusted-authors",
+    "also include comments from authors without write access to the repository",
+  )
   .option("-c, --clipboard", "copy output to clipboard")
   .action(async (prUrl: string, options) => {
     await executeMainCommand(prUrl, options);
@@ -31,6 +35,10 @@ program
   .argument("<pr-url>", "GitHub PR URL")
   .option("-a, --all", "resolve all comments without interactive mode")
   .option("-m, --mention <mention>", "custom mention to filter (default: [ai])", "[ai]")
+  .option(
+    "--include-untrusted-authors",
+    "also include comments from authors without write access to the repository",
+  )
   .action(async (prUrl: string, options) => {
     await executeResolveCommand(prUrl, options);
   });
@@ -41,6 +49,10 @@ program
   .argument("<pr-url>", "GitHub PR URL")
   .option("-a, --all", "delete all comments without interactive mode")
   .option("-m, --mention <mention>", "custom mention to filter (default: [ai])", "[ai]")
+  .option(
+    "--include-untrusted-authors",
+    "also include comments from authors without write access to the repository",
+  )
   .action(async (prUrl: string, options) => {
     await executeDeleteCommand(prUrl, options);
   });
