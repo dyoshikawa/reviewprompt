@@ -97,9 +97,10 @@ export function cleanCommentBody(body: string, mention: string = DEFAULT_MENTION
 // buildPrompt joins sections with a "=====" line; escape such lines in a body so one comment
 // cannot fake the start of another section.
 function escapeSectionSeparators(body: string): string {
-  // Horizontal whitespace only: `\s` would also match newlines and anchor on a blank line above.
-  // Fullwidth "＝" (U+FF1D) is included because a model may read it as the same separator.
-  return body.replace(/^([ \t]*[=\uFF1D]{5,}[ \t]*)$/gm, "\\$1");
+  // `[^\S\n]` is any whitespace except newline (including U+00A0 and U+3000): plain `\s` would
+  // also match newlines and anchor on a blank line above. Fullwidth "\uFF1D" is included because a
+  // model may read it as the same separator.
+  return body.replace(/^([^\S\n]*[=\uFF1D]{5,}[^\S\n]*)$/gm, "\\$1");
 }
 
 export function formatCommentForPrompt(
