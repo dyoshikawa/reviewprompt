@@ -77,15 +77,17 @@ ReviewPrompt is a GitHub PR review comment aggregation CLI tool that extracts AI
 2. Authenticate with GitHub API using token
 3. Fetch all review comments from the PR
 4. Filter comments containing the specified mention
-5. Present comments for selection (interactive mode) or process all
-6. Generate structured prompt from selected comments
-7. Output to console or clipboard
-8. Optionally resolve/delete processed comments
+5. Drop comments from untrusted authors (author association not `OWNER`/`MEMBER`/`COLLABORATOR` and not the authenticated user) unless `--include-untrusted-authors` is passed
+6. Present comments for selection (interactive mode) or process all
+7. Generate structured prompt from selected comments
+8. Output to console or clipboard
+9. Optionally resolve/delete processed comments
 
 ### Configuration
 
 - **Authentication**: Supports both GitHub Personal Access Token (`GITHUB_TOKEN` env var) and GitHub CLI authentication
 - **Mention Filtering**: Configurable mention patterns (default: `[ai]`)
+- **Trust Filtering**: Only comments by `OWNER`/`MEMBER`/`COLLABORATOR` authors or the authenticated user by default; `--include-untrusted-authors` disables it
 - **Output Modes**: Console display or direct clipboard copy
 - **Processing Modes**: Interactive selection (default) or batch processing with `--all` flag
 - **Comment Actions**: View, resolve, or delete comments after processing

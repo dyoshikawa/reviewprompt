@@ -4,7 +4,7 @@ import { GitHubClient } from "../../lib/github.js";
 import type { CliOptions, PRInfo } from "../../lib/types.js";
 import { copyToClipboard } from "../../utils/clipboard.js";
 import { buildPrompt, displayPrompt } from "../../utils/prompt.js";
-import { collectMentionedComments } from "./collect-comments.js";
+import { collectMentionedComments, noCommentsMessage } from "./collect-comments.js";
 
 export async function executeMainCommand(prUrl: string, options: CliOptions): Promise<void> {
   try {
@@ -12,10 +12,15 @@ export async function executeMainCommand(prUrl: string, options: CliOptions): Pr
     const prInfo: PRInfo = client.parsePRUrl(prUrl);
 
     const mention = options.mention || "[ai]";
-    const filteredComments = await collectMentionedComments(client, prInfo, mention, options);
+    const { comments: filteredComments, skippedCount } = await collectMentionedComments(
+      client,
+      prInfo,
+      mention,
+      options,
+    );
 
     if (filteredComments.length === 0) {
-      console.log(`No comments found with mention "${mention}"`);
+      console.log(noCommentsMessage(mention, skippedCount));
       return;
     }
 
@@ -25,6 +30,7 @@ export async function executeMainCommand(prUrl: string, options: CliOptions): Pr
       selectedComments = await showCommentSelector(
         filteredComments,
         `Select comments with "${mention}" to include in prompt:`,
+        mention,
       );
 
       if (selectedComments.length === 0) {

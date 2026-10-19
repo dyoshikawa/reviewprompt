@@ -26,9 +26,12 @@ export function filterCommentsByMention(
 }
 
 /**
- * Author associations that have write access to the repository. Comments from anyone else
- * (CONTRIBUTOR, FIRST_TIME_CONTRIBUTOR, NONE, ...) can be posted by any GitHub user on a public
- * repository, so they are not trusted as prompt input by default.
+ * Author associations trusted as prompt input by default: the repository owner, members of the
+ * owning organization, and invited collaborators. This is GitHub's `authorAssociation`, not a
+ * permission check: MEMBER does not guarantee any access to this particular repository, and a
+ * maintainer whose organization membership is private may show up as CONTRIBUTOR or NONE.
+ * Anyone else (CONTRIBUTOR, FIRST_TIME_CONTRIBUTOR, NONE, ...) can be any GitHub user on a public
+ * repository, so their comments are excluded unless the caller opts in.
  */
 export const TRUSTED_AUTHOR_ASSOCIATIONS: ReadonlySet<string> = new Set([
   "OWNER",
@@ -58,13 +61,24 @@ export function partitionCommentsByTrust(
   return { trusted, untrusted };
 }
 
-// C0 controls except tab and newline, DEL, C1 controls, and Unicode bidi overrides/isolates.
-// These can rewrite or hide terminal output (ANSI escape sequences) or reorder displayed text.
-// oxlint-disable-next-line no-control-regex
-const UNSAFE_CHARACTERS = /[\u0000-\u0008\u000B-\u001F\u007F-\u009F\u202A-\u202E\u2066-\u2069]/g;
+// C0 controls except tab and newline, DEL, C1 controls, bidi marks/overrides/isolates,
+// zero-width characters, the BOM, and Unicode tag characters. These can rewrite terminal output
+// (ANSI escape sequences), reorder displayed text, or hide text from a human reader while an AI
+// model still reads it.
+const UNSAFE_CHARACTERS =
+  // oxlint-disable-next-line no-control-regex
+  /[\u0000-\u0008\u000B-\u001F\u007F-\u009F\u061C\u200B-\u200F\u202A-\u202E\u2060-\u2069\uFEFF]|[\u{E0000}-\u{E007F}]/gu;
 
 export function stripControlCharacters(text: string): string {
-  return text.replace(/\r\n?/g, "\n").replace(UNSAFE_CHARACTERS, "");
+  return text.replace(/\r\n?|[\u2028\u2029]/g, "\n").replace(UNSAFE_CHARACTERS, "");
+}
+
+/**
+ * Single-line variant for values that must not span lines, such as file paths (a git path can
+ * contain newlines, and the PR author chooses it).
+ */
+export function sanitizeSingleLine(text: string): string {
+  return stripControlCharacters(text).replace(/[\n\t]+/g, " ");
 }
 
 export function cleanCommentBody(body: string, mention: string = "[ai]"): string {
@@ -86,7 +100,7 @@ export function formatCommentForPrompt(comment: FilteredComment): string {
         ? `L${comment.startLine}-L${comment.line}`
         : `L${comment.line || comment.startLine}`;
 
-    return `./${stripControlCharacters(comment.path)}:${lineInfo}\n${cleanBody}`;
+    return `./${sanitizeSingleLine(comment.path)}:${lineInfo}\n${cleanBody}`;
   }
 
   return `${cleanBody}`;

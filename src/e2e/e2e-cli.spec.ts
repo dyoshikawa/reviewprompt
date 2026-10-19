@@ -73,6 +73,7 @@ describe("reviewprompt CLI (e2e)", () => {
       expect(result.stdout).toContain("--delete");
       expect(result.stdout).toContain("--mention");
       expect(result.stdout).toContain("--clipboard");
+      expect(result.stdout).toContain("--include-untrusted-authors");
     });
 
     it("lists the resolve and delete subcommands", async () => {
@@ -106,6 +107,7 @@ describe("reviewprompt CLI (e2e)", () => {
       expect(result.stdout).toContain("<pr-url>");
       expect(result.stdout).toContain("--mention");
       expect(result.stdout).toContain("--all");
+      expect(result.stdout).toContain("--include-untrusted-authors");
     });
 
     it("prints help for the delete subcommand", async () => {
@@ -116,6 +118,7 @@ describe("reviewprompt CLI (e2e)", () => {
       expect(result.stdout).toContain("<pr-url>");
       expect(result.stdout).toContain("--mention");
       expect(result.stdout).toContain("--all");
+      expect(result.stdout).toContain("--include-untrusted-authors");
     });
   });
 

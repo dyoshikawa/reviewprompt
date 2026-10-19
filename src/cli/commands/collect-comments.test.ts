@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { GitHubClient } from "../../lib/github.js";
 import type { PRComment } from "../../lib/types.js";
-import { collectMentionedComments } from "./collect-comments.js";
+import { collectMentionedComments, noCommentsMessage } from "./collect-comments.js";
 
 const prInfo = { owner: "o", repo: "r", pullNumber: 1 };
 
@@ -53,7 +53,8 @@ describe("collectMentionedComments", () => {
 
     const result = await collectMentionedComments(client, prInfo, "[ai]", {});
 
-    expect(result.map((c) => c.id)).toEqual([1, 3]);
+    expect(result.comments.map((c) => c.id)).toEqual([1, 3]);
+    expect(result.skippedCount).toBe(1);
     expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining("Skipped 1 comment(s)"));
     expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining("@stranger"));
   });
@@ -65,7 +66,50 @@ describe("collectMentionedComments", () => {
       includeUntrustedAuthors: true,
     });
 
-    expect(result.map((c) => c.id)).toEqual([1, 2]);
+    expect(result.comments.map((c) => c.id)).toEqual([1, 2]);
+    expect(result.skippedCount).toBe(0);
     expect(client.getViewerLogin).not.toHaveBeenCalled();
+  });
+
+  it("drops the viewer's own CONTRIBUTOR comment when the viewer login is unavailable", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const client = mockClient([comment(1, "me", "CONTRIBUTOR")], undefined);
+
+    const result = await collectMentionedComments(client, prInfo, "[ai]", {});
+
+    expect(result.comments).toEqual([]);
+    expect(result.skippedCount).toBe(1);
+  });
+
+  it("does not look up the viewer when no comment carries the mention", async () => {
+    const client = mockClient([comment(1, "owner", "OWNER", "no mention")], "me");
+
+    const result = await collectMentionedComments(client, prInfo, "[ai]", {});
+
+    expect(result).toEqual({ comments: [], skippedCount: 0 });
+    expect(client.getViewerLogin).not.toHaveBeenCalled();
+  });
+
+  it("lists each untrusted author once", async () => {
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const client = mockClient([comment(1, "stranger", "NONE"), comment(2, "stranger", "NONE")]);
+
+    await collectMentionedComments(client, prInfo, "[ai]", {});
+
+    const message = String(errorSpy.mock.calls[0]?.[0]);
+    expect(message).toContain("Skipped 2 comment(s)");
+    expect(message.match(/@stranger/g)).toHaveLength(1);
+  });
+});
+
+describe("noCommentsMessage", () => {
+  it("mentions skipped comments when some were dropped", () => {
+    expect(noCommentsMessage("[ai]", 2)).toBe(
+      'No trusted comments found with mention "[ai]" (2 skipped)',
+    );
+  });
+
+  it("keeps the plain message when nothing was skipped", () => {
+    expect(noCommentsMessage("[ai]", 0)).toBe('No comments found with mention "[ai]"');
   });
 });
