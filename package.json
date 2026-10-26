@@ -61,7 +61,7 @@
     "dependencies": {
         "@octokit/graphql": "9.0.5",
         "@types/react": "19.3.0",
-        "chokidar": "5.0.0",
+        "chokidar": "6.0.0",
         "clipboardy": "5.3.2",
         "commander": "15.0.0",
         "ink": "8.0.0",
@@ -72,7 +72,7 @@
         "zod": "4.6.7"
     },
     "devDependencies": {
-        "@openrouter/sdk": "1.4.25",
+        "@openrouter/sdk": "1.5.7",
         "@secretlint/secretlint-rule-preset-recommend": "13.0.7",
         "@toon-format/toon": "4.4.0",
         "@tsconfig/node24": "24.0.5",
@@ -83,11 +83,11 @@
         "cspell": "10.4.0",
         "lint-staged": "17.6.0",
         "o3-search-mcp": "0.0.9",
-        "oxfmt": "0.73.0",
-        "oxlint": "1.88.0",
+        "oxfmt": "0.74.0",
+        "oxlint": "1.89.0",
         "repomix": "1.18.1",
         "resend": "6.34.1",
-        "rulesync": "37.1.0",
+        "rulesync": "41.0.0",
         "secretlint": "13.0.7",
         "simple-git-hooks": "2.14.0",
         "sort-package-json": "4.1.0",
