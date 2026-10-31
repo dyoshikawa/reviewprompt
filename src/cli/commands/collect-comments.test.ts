@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vite-plus/test";
 
 import type { GitHubClient } from "../../lib/github.js";
 import type { PRComment } from "../../lib/types.js";

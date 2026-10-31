@@ -58,11 +58,12 @@ ReviewPrompt is a GitHub PR review comment aggregation CLI tool that extracts AI
 - **CLI Framework**: Commander.js
 - **UI Framework**: React + ink (for TUI components)
 - **GitHub API**: Octokit GraphQL and REST
-- **Build Tool**: tsup
+- **Toolchain**: Vite+ (`vp`), configured in `vite.config.ts`
+- **Build Tool**: `vp pack` (tsdown)
 - **Package Manager**: pnpm
-- **Testing**: Vitest
-- **Linting**: oxlint
-- **Formatting**: oxfmt
+- **Testing**: Vitest (`vp test`)
+- **Linting**: oxlint (`vp lint`)
+- **Formatting**: oxfmt (`vp fmt`)
 
 ### Development Commands
 

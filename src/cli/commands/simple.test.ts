@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vite-plus/test";
 
 // Simple basic tests that exercise CLI command logic without complex mocking
 describe("CLI Commands Basic Structure", () => {

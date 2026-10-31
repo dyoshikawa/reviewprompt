@@ -1,3 +1,28 @@
 minimumReleaseAge: 1440 # 1 day
 
 ignoreScripts: true
+# Every package that asks for `vite` or `vitest` gets the copies Vite+ ships.
+overrides:
+  vite@*: "catalog:"
+  vitest@*: "catalog:"
+# Vite+ (`vp`) and the tools it drives. `vite` is Vite+'s core under the
+# upstream name, so packages that import `vite` keep working.
+catalog:
+  vite: npm:@voidzero-dev/vite-plus-core@1.4.0
+  vitest: 5.0.5
+  vite-plus: 1.4.0
+  "@vitest/coverage-v8": 5.0.5
+  # `vp` resolves oxfmt and oxlint from the working directory before its own
+  # copies, so a checkout nested in another project would otherwise run that
+  # project's formatter and linter. Keep these at the versions vite-plus
+  # bundles (its dist/toolchain.json).
+  oxfmt: 0.74.0
+  oxlint: 1.89.0
+# Packages declare peer ranges on upstream vite/vitest; the aliased copies satisfy them.
+peerDependencyRules:
+  allowAny:
+    - vite
+    - vitest
+  allowedVersions:
+    vite: "*"
+    vitest: "*"
