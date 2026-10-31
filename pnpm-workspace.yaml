@@ -16,8 +16,8 @@ catalog:
   # copies, so a checkout nested in another project would otherwise run that
   # project's formatter and linter. Keep these at the versions vite-plus
   # bundles (its dist/toolchain.json).
-  oxfmt: 0.74.0
-  oxlint: 1.89.0
+  oxfmt: 0.75.0
+  oxlint: 1.90.0
 # Packages declare peer ranges on upstream vite/vitest; the aliased copies satisfy them.
 peerDependencyRules:
   allowAny:
