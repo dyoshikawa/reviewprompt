@@ -349,3 +349,4 @@ rulesync.local.jsonc
 **/.warp/.mcp.json
 **/.warp/skills/
 **/.rules
+.vitest/

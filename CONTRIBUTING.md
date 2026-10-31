@@ -39,10 +39,9 @@ Thank you for your interest in contributing to ReviewPrompt! This guide will hel
    ```
 
 2. **Development Tools**: The project includes several development tools configured via:
-   - `.oxlintrc.json` - oxlint (linting) configuration
-   - `.oxfmtrc.json` - oxfmt (formatting) configuration
+   - `vite.config.ts` - [Vite+](https://viteplus.dev/) configuration: the build (`vp pack`), formatting (`vp fmt`, Oxfmt), linting (`vp lint`, Oxlint) and the pre-commit checks (`vp staged`)
    - `tsconfig.json` - TypeScript configuration
-   - `vitest.config.ts` - Test configuration
+   - `vitest.config.ts` - Unit test configuration (`vitest.e2e.config.ts` for the e2e tests)
 
 ## Development Workflow
 
@@ -51,7 +50,7 @@ Thank you for your interest in contributing to ReviewPrompt! This guide will hel
 ```bash
 # Development
 pnpm dev                 # Run CLI in development mode with tsx
-pnpm build              # Build the project
+pnpm build              # Build the project with vp pack
 pnpm test               # Run tests
 pnpm test:watch         # Run tests in watch mode
 pnpm test:coverage      # Run tests with coverage report
@@ -65,9 +64,9 @@ pnpm fix                # Auto-fix formatting and lint issues
 pnpm typecheck          # TypeScript type checking
 
 # Individual tools
-pnpm fmt                # Format with oxfmt
-pnpm fmt:check          # Check formatting with oxfmt
-pnpm oxlint             # Lint with oxlint
+pnpm fmt                # Format with vp fmt (Oxfmt)
+pnpm fmt:check          # Check formatting with vp fmt (Oxfmt)
+pnpm oxlint             # Lint with vp lint (Oxlint)
 pnpm cspell             # Spell checking
 pnpm secretlint         # Secret scanning
 ```
@@ -85,7 +84,7 @@ node dist/index.js https://github.com/owner/repo/pull/123
 
 ### Testing
 
-We use [Vitest](https://vitest.dev/) for testing. Tests are located alongside source files with `.test.ts` extension.
+We use [Vitest](https://vitest.dev/), run through Vite+'s `vp test`, for testing. Tests are located alongside source files with `.test.ts` extension.
 
 ```bash
 # Run all tests
@@ -98,15 +97,16 @@ pnpm test:coverage
 pnpm test:watch
 
 # Run specific test file
-pnpm vitest src/lib/comment.test.ts
+pnpm exec vp test run src/lib/comment.test.ts
 ```
 
 ### Code Quality Standards
 
 We maintain high code quality standards using multiple tools:
 
-- **oxfmt**: Code formatter
-- **oxlint**: Fast linter for common issues
+- **Vite+** (`vp`): Runs the formatter, linter, tests, build and pre-commit checks
+- **oxfmt**: Code formatter (`vp fmt`)
+- **oxlint**: Fast linter for common issues (`vp lint`)
 - **TypeScript**: Strict type checking
 - **CSpell**: Spell checking in code and comments
 - **Secretlint**: Prevents committing secrets
@@ -190,7 +190,7 @@ We follow [Conventional Commits](https://www.conventionalcommits.org/):
 ### Code Style Guidelines
 
 1. **TypeScript**: Use strict typing, avoid `any` when possible
-2. **Formatting**: Automatic via oxfmt (runs on pre-commit)
+2. **Formatting**: Automatic via oxfmt (`vp staged` runs it on pre-commit)
 3. **Naming**: Use descriptive names for functions and variables
 4. **Comments**: Add JSDoc comments for public APIs
 5. **Imports**: Use relative imports within the project
