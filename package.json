@@ -69,7 +69,7 @@
         "zod": "4.6.7"
     },
     "devDependencies": {
-        "@openrouter/sdk": "1.5.27",
+        "@openrouter/sdk": "1.5.33",
         "@secretlint/secretlint-rule-preset-recommend": "13.1.0",
         "@toon-format/toon": "4.4.0",
         "@tsconfig/node24": "24.0.5",
@@ -82,8 +82,8 @@
         "oxfmt": "catalog:",
         "oxlint": "catalog:",
         "repomix": "1.18.1",
-        "resend": "6.35.0",
-        "rulesync": "43.3.0",
+        "resend": "6.37.0",
+        "rulesync": "43.4.1",
         "secretlint": "13.1.0",
         "sort-package-json": "4.1.0",
         "tsx": "4.23.15",
