@@ -40,8 +40,12 @@ gh pr view --json number,title,body 2>/dev/null
 
 Create a new PR:
 
+Write the PR description to a fresh file created with `mktemp` (with the
+file-writing tool or a quoted heredoc `<<'EOF'`) and pass it as a file, so
+backticks and `$(...)` in it are never interpreted by the shell:
+
 ```bash
-gh pr create --title "<title>" --body "<description>"
+gh pr create --title "<title>" --body-file <description_file>
 ```
 
 The PR description should include:
@@ -55,7 +59,7 @@ The PR description should include:
 2. If updates are needed (e.g., scope of changes has expanded), update the PR using GitHub API:
 
 ```bash
-gh api repos/<owner>/<repo>/pulls/<pr-number> -X PATCH -f title="<new-title>" -f body="<new-description>"
+gh api repos/<owner>/<repo>/pulls/<pr-number> -X PATCH -f title="<new-title>" -F body=@<description_file>
 ```
 
 Note: Use `gh api` instead of `gh pr edit` to avoid GraphQL deprecation warnings. 3. If no updates are needed, skip this step
