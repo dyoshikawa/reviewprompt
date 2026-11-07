@@ -23,8 +23,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
-          ref: ${{ github.event.release.tag_name }}
+          ref: refs/tags/${{ github.event.release.tag_name }}
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Verify release tag
         env:
@@ -35,16 +36,17 @@ jobs:
             echo "::error::Tag ${TAG_NAME} does not point at a commit on main."
             exit 1
           fi
-          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          PACKAGE_VERSION=$(jq -r .version package.json)
           if [ "${TAG_NAME}" != "v${PACKAGE_VERSION}" ]; then
             echo "::error::Tag ${TAG_NAME} does not match package.json version ${PACKAGE_VERSION}."
             exit 1
           fi
 
       - name: Setup mise
-        uses: jdx/mise-action@82a612c5ab8bcda7cc5db6b7e81a8e7584c3dc6e # v2
+        uses: jdx/mise-action@6612f0ef07ed2a736cd1e00a94a065522dd41195 # v2
         with:
           experimental: true
+          install_args: node pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --ignore-scripts

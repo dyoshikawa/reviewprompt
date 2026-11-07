@@ -22,6 +22,7 @@ jobs:
         uses: jdx/mise-action@6612f0ef07ed2a736cd1e00a94a065522dd41195 # v2
         with:
           experimental: true
+          install_args: node pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --ignore-scripts
