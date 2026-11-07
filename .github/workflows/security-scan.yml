@@ -24,7 +24,7 @@ jobs:
           experimental: true
 
       - name: Install dependencies
-        run: pnpm install --ignore-scripts
+        run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: Generate toon files
         run: pnpm exec tsx scripts/generate-repomix-toon.ts
