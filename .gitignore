@@ -161,9 +161,6 @@ dist
 # npm
 package-lock.json
 
-# pnpm
-pnpm-lock.yaml
-
 **/.cursor/rules/
 **/.copilotignore
 **/.aiexclude
