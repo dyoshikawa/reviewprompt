@@ -394,6 +394,10 @@ describe("stripControlCharacters", () => {
     expect(stripControlCharacters(`a${smuggled}b\u00adc\u180ed\u3164e\u034ff`)).toBe("abcdef");
   });
 
+  it("removes Hangul fillers and Mongolian variation selectors, alone and in sequence", () => {
+    expect(stripControlCharacters("a\u115fb\u1160c\u115f\u1160\u180bd\u180f\uffa0e")).toBe("abcde");
+  });
+
   it("removes the braille blank and private-use characters", () => {
     expect(stripControlCharacters(`a\u2800b\ue000c${String.fromCodePoint(0xf0000)}d`)).toBe("abcd");
   });
