@@ -5,27 +5,52 @@ on:
     types: [created]
 
 permissions:
-  id-token: write # Required for OIDC
-  contents: read # Required for checking out code
+  contents: read
 
 jobs:
-  publish:
-    name: Publish to NPM
+  build:
+    name: Build and verify the package
     runs-on: ubuntu-latest
+    # No id-token here: dev dependencies (build, e2e) run in this job, so they
+    # never see the OIDC token that can publish to npm.
+    permissions:
+      contents: read # Required for checking out code
 
     steps:
       - name: Checkout code
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
-          ref: main
+          ref: refs/tags/${{ github.event.release.tag_name }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify release tag
+        env:
+          TAG_NAME: ${{ github.event.release.tag_name }}
+        run: |
+          set -euo pipefail
+          if [ "$(git rev-parse HEAD)" != "${GITHUB_SHA}" ]; then
+            echo "::error::Tag ${TAG_NAME} moved after the release was created."
+            exit 1
+          fi
+          if ! git merge-base --is-ancestor HEAD origin/main; then
+            echo "::error::Tag ${TAG_NAME} does not point at a commit on main."
+            exit 1
+          fi
+          PACKAGE_VERSION=$(jq -r .version package.json)
+          if [ "${TAG_NAME}" != "v${PACKAGE_VERSION}" ]; then
+            echo "::error::Tag ${TAG_NAME} does not match package.json version ${PACKAGE_VERSION}."
+            exit 1
+          fi
 
       - name: Setup mise
         uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v2
         with:
           experimental: true
+          install_args: node pnpm
 
       - name: Install dependencies
-        run: pnpm install --ignore-scripts
+        run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: Build
         run: pnpm build
@@ -35,5 +60,56 @@ jobs:
         env:
           REVIEWPROMPT_CMD: node dist/index.js
 
+      - name: Pack
+        run: |
+          set -euo pipefail
+          mkdir -p package
+          pnpm pack --pack-destination package
+
+      - name: Upload package
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: npm-package
+          path: package/*.tgz
+          if-no-files-found: error
+          retention-days: 1
+
+  publish:
+    name: Publish to NPM
+    needs: build
+    runs-on: ubuntu-latest
+    # Add required reviewers and a v* tag rule to this environment in the
+    # repository settings, and set the same environment on the npm trusted
+    # publisher, so an OIDC publish needs the environment's approval.
+    environment: npm-release
+    permissions:
+      id-token: write # Required for OIDC
+    # Only Node/npm and the tarball built above run here: no checkout, no
+    # dependency install, no cache restore.
+
+    steps:
+      - name: Download package
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: npm-package
+          path: package
+
+      - name: Setup mise
+        uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v2
+        with:
+          experimental: true
+          cache: false
+          mise_toml: |
+            [tools]
+            node = "26"
+
       - name: Publish to npm
-        run: pnpm publish --no-git-checks
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          tarballs=(package/*.tgz)
+          if [ "${#tarballs[@]}" -ne 1 ]; then
+            echo "::error::Expected exactly one package tarball, found ${#tarballs[@]}."
+            exit 1
+          fi
+          npm publish "${tarballs[0]}" --access public

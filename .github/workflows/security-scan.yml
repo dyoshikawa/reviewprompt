@@ -22,9 +22,10 @@ jobs:
         uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v2
         with:
           experimental: true
+          install_args: node pnpm
 
       - name: Install dependencies
-        run: pnpm install --ignore-scripts
+        run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: Generate toon files
         run: pnpm exec tsx scripts/generate-repomix-toon.ts
