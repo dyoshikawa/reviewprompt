@@ -69,8 +69,11 @@ export function partitionCommentsByTrust(
 // sequences), reorder displayed text, or hide text from a human reader while an AI model still
 // reads it (tag-character and variation-selector smuggling). Private-use characters (Co) render
 // as nothing or as an arbitrary glyph, so they are dropped as well.
+// The Mongolian variation selectors (U+180B-U+180F) are combining marks, so they get their own
+// character class: next to the fillers they would read as one combined sequence
+// (no-misleading-character-class).
 const UNSAFE_CHARACTERS =
-  /(?![\t\n])\p{Cc}|\p{Cf}|\u034F|[\u115F\u1160\u180B-\u180F\u2800\u3164\uFFA0]|\p{Co}|[\uFE00-\uFE0F]|[\u{E0100}-\u{E01EF}]/gu;
+  /(?![\t\n])\p{Cc}|\p{Cf}|\u034F|[\u115F\u1160\u2800\u3164\uFFA0]|[\u180B-\u180F]|\p{Co}|[\uFE00-\uFE0F]|[\u{E0100}-\u{E01EF}]/gu;
 
 export function stripControlCharacters(text: string): string {
   return text.replace(/\r\n?|[\u2028\u2029]/g, "\n").replace(UNSAFE_CHARACTERS, "");
